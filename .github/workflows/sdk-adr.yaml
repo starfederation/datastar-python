@@ -1,0 +1,44 @@
+name: SDK Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.7.21"
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Run SDK test server
+        run: uv run sdk-test.py &
+
+      - name: Checkout datastar repository
+        uses: actions/checkout@v4
+        with:
+          repository: gazpachoking/datastar
+          ref: fix-go-sdk-tests
+          path: datastar
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: datastar/sdk/tests
+
+      - name: Run SDK tests against test server
+        working-directory: datastar/sdk/tests
+        run: go run ./cmd/datastar-sdk-tests -server http://localhost:8000
