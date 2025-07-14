@@ -27,8 +27,8 @@ classifiers = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/starfederation/datastar/blob/develop/sdk/python/README.md"
-GitHub = "https://github.com/starfederation/datastar"
+Documentation = "https://github.com/starfederation/datastar-python/blob/develop/README.md"
+GitHub = "https://github.com/starfederation/datastar-python"
 
 [build-system]
 requires = ["hatchling"]
@@ -49,9 +49,6 @@ dev = [
 
 [tool.ruff]
 line-length = 99
-exclude = [
-  "src/datastar_py/consts.py",
-]
 [tool.ruff.lint]
 select = [
     # pycodestyle
