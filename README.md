@@ -1,6 +1,8 @@
-# datastar-py
+<p align="center"><img width="150" height="150" src="https://data-star.dev/static/images/rocket-512x512.png"></p>
 
-The `datastar-py` package provides backend helpers for the [Datastar](https://data-star.dev) JS library.
+# Datastar Python SDK
+
+The `datastar-py` package provides a Python SDK for working with [Datastar](https://data-star.dev).
 
 Datastar sends responses back to the browser using SSE. This allows the backend to
 send any number of events, from zero to infinity in response to a single request.
