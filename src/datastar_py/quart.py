@@ -55,7 +55,7 @@ def datastar_response(
             return DatastarResponse(stream_with_context(func)(*args, **kwargs))
         return DatastarResponse(await copy_current_request_context(func)(*args, **kwargs))
 
-    wrapper.__annotations__["return"] = "DatastarResponse"
+    wrapper.__annotations__["return"] = DatastarResponse
     return wrapper
 
 

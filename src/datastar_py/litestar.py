@@ -77,7 +77,7 @@ def datastar_response(
             return DatastarResponse(await r)
         return DatastarResponse(r)
 
-    wrapper.__annotations__["return"] = "DatastarResponse"
+    wrapper.__annotations__["return"] = DatastarResponse
     return wrapper
 
 
