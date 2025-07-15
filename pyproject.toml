@@ -5,7 +5,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "datastar-py"
-version = "0.6.0"
+version = "0.6.1"
 description = "Helper functions and classes for the Datastar library (https://data-star.dev/)"
 readme = "README.md"
 keywords = [ "datastar", "django", "fastapi", "fasthtml", "flask", "html", "litestar", "quart", "sanic", "starlette" ]
