@@ -10,7 +10,7 @@
 import asyncio
 from datetime import datetime
 
-from datastar_py.consts import ElementPatchMode, VERSION
+from datastar_py.consts import ElementPatchMode
 from datastar_py.sanic import (
     DatastarResponse,
     ServerSentEventGenerator,

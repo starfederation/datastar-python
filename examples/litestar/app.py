@@ -12,7 +12,6 @@ from collections.abc import AsyncGenerator
 from datetime import datetime
 
 import uvicorn
-from datastar_py.consts import VERSION
 from datastar_py.litestar import (
     DatastarResponse,
     ServerSentEventGenerator,

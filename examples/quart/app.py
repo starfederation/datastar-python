@@ -10,7 +10,6 @@
 import asyncio
 from datetime import datetime
 
-from datastar_py.consts import VERSION
 from datastar_py.quart import (
     DatastarResponse,
     ServerSentEventGenerator,

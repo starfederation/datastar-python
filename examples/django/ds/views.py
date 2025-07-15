@@ -2,7 +2,6 @@ import asyncio
 import time
 from datetime import datetime
 
-from datastar_py.consts import VERSION
 from datastar_py.django import (
     DatastarResponse,
     ServerSentEventGenerator,

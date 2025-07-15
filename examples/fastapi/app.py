@@ -12,7 +12,6 @@ import asyncio
 from datetime import datetime
 
 import uvicorn
-from datastar_py.consts import VERSION
 from datastar_py.fastapi import (
     DatastarResponse,
     ReadSignals,
