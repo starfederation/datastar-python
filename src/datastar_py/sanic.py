@@ -30,6 +30,9 @@ class DatastarResponse(HTTPResponse):
     ) -> None:
         if not content:
             status = status or 204
+        elif not isinstance(content, str):
+            # Collections of events just get concatenated
+            content = "".join(content)
         super().__init__(
             content, status=status or 200, headers={**self.default_headers, **(headers or {})}
         )
