@@ -5,26 +5,27 @@
 #     "python-fasthtml",
 # ]
 # [tool.uv.sources]
-# datastar-py = { path = "../../../sdk/python" }
+# datastar-py = { path = "../../" }
 # ///
 import asyncio
 import json
 from datetime import datetime
-from pathlib import Path
 
 from datastar_py.fasthtml import DatastarResponse, ServerSentEventGenerator, read_signals
 
 # ruff: noqa: F403, F405
 from fasthtml.common import *
 
-repo_root = next(p for p in Path(__file__).parents if (p / ".git").exists())
-
 app, rt = fast_app(
     htmx=False,
     surreal=False,
     live=True,
-    static_path=str(repo_root),
-    hdrs=(Script(type="module", src="/bundles/datastar.js"),),
+    hdrs=(
+        Script(
+            type="module",
+            src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js",
+        ),
+    ),
 )
 
 example_style = Style(

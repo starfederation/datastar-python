@@ -9,12 +9,11 @@
 #     "python-fasthtml",
 # ]
 # [tool.uv.sources]
-# datastar-py = { path = "../../../sdk/python" }
+# datastar-py = { path = "../../" }
 # ///
 import asyncio
 import json
 from datetime import datetime
-from pathlib import Path
 
 import polars as pl
 from datastar_py.fasthtml import DatastarResponse, ServerSentEventGenerator
@@ -39,14 +38,16 @@ from fasthtml.common import *
 # - Great Tables: https://posit-dev.github.io/great-tables/articles/intro.html    #
 ###################################################################################
 
-repo_root = next(p for p in Path(__file__).parents if (p / ".git").exists())
-
 app, rt = fast_app(
     htmx=False,
     surreal=False,
     live=True,
-    static_path=str(repo_root),
-    hdrs=(Script(type="module", src="/bundles/datastar.js"),),
+    hdrs=(
+        Script(
+            type="module",
+            src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js",
+        ),
+    ),
 )
 
 default_pattern = "aldehyde"

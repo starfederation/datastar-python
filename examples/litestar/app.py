@@ -4,7 +4,7 @@
 #   "litestar",
 # ]
 # [tool.uv.sources]
-# datastar-py = { path = "../../../sdk/python" }
+# datastar-py = { path = "../../" }
 # ///
 
 import asyncio

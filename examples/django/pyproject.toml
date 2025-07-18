@@ -4,11 +4,18 @@ version = "1.0.0"
 description = "Datastar Example Django Project"
 readme = "README.md"
 requires-python = ">=3.10"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
 dependencies = [
-    "daphne>=4.2.0",
-    "datastar-py>=0.4.4",
-    "django>=5.2.1",
+  "daphne>=4.2",
+  "datastar-py>=0.4.4",
+  "django>=5.2.1",
 ]
 
 [tool.uv.sources]
-datastar-py = { path = "../../../sdk/python" }
+datastar-py = { path = "../../" }
