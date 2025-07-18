@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Collection, Mapping
+from contextlib import aclosing, closing
 from functools import wraps
 from inspect import isasyncgen, isgenerator
 from typing import Any, Callable, ParamSpec, Union
@@ -74,15 +75,19 @@ def datastar_response(
         if isasyncgen(r):
             request = args[0]
             response = await request.respond(response=DatastarResponse())
-            async for event in r:
-                await response.send(event)
+            # Make sure when the client cancels the stream clean up the generator now
+            # Without the aclosing manager it would happen at garbage collection
+            async with aclosing(r) as ait:
+                async for event in ait:
+                    await response.send(event)
             await response.eof()
             return None
         if isgenerator(r):
             request = args[0]
             response = await request.respond(response=DatastarResponse())
-            for event in r:
-                await response.send(event)
+            with closing(r) as it:
+                for event in it:
+                    await response.send(event)
             await response.eof()
             return None
         return DatastarResponse(r)
