@@ -27,18 +27,30 @@ To use `datastar-py`, import the SSE generator in your app and then use
 it in your route handler:
 
 ```python
+import asyncio
+
 from datastar_py import ServerSentEventGenerator as SSE
+from datastar_py.sse import SSE_HEADERS
+from quart import Quart, make_response
+from datetime import datetime
 
+app = Quart(__name__)
 
-# ... various app setup.
-# The example below is for the Quart framework, and is only using the event generation helpers.
+# Import frontend library via Content Distribution Network, create targets for Server Sent Events
+@app.route("/")
+def index():
+    return '''
+    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+    <span data-on-load="@get('/updates')" id="currentTime"></span><br><span data-text="$currentTime"></div>
+    '''
+
 
 @app.route("/updates")
 async def updates():
     async def time_updates():
         while True:
             yield SSE.patch_elements(
-                [f"""<span id="currentTime">{datetime.now().isoformat()}"""]
+                f"""<span id="currentTime">{datetime.now().isoformat()}"""
             )
             await asyncio.sleep(1)
             yield SSE.patch_signals({"currentTime": f"{datetime.now().isoformat()}"})
@@ -47,7 +59,12 @@ async def updates():
     response = await make_response(time_updates(), SSE_HEADERS)
     response.timeout = None
     return response
+
+
+app.run()
 ```
+
+The example above is for the Quart framework, and is only using the event generation helpers.
 
 ## Response Helpers
 
@@ -60,32 +77,45 @@ e.g. `from datastar_py.quart import DatastarResponse` The containing functions
 are not shown here, as they will differ per framework.
 
 ```python
+# per framework Response import, eg:
+# from datastar_py.fastapi import DatastarResponse
 from datastar_py import ServerSentEventGenerator as SSE
 
 # 0 events, a 204
-return DatastarResponse()
+@app.get("zero")
+def zero_event():
+    return DatastarResponse()
 # 1 event
-return DatastarResponse(SSE.patch_elements("<div id='mydiv'></div>"))
+@app.get("one")
+def one_event():
+    return DatastarResponse(SSE.patch_elements("<div id='mydiv'></div>"))
 # 2 events
-return DatastarResponse([
-    SSE.patch_elements("<div id='mydiv'></div>"),
-    SSE.patch_signals({"mysignal": "myval"}),
-])
+@app.get("two")
+def two_event():
+    return DatastarResponse([
+        SSE.patch_elements("<div id='mydiv'></div>"),
+        SSE.patch_signals({"mysignal": "myval"}),
+    ])
 
 # N events, a long lived stream (for all frameworks but sanic)
+
+@app.get("/updates")
 async def updates():
-    while True:
-        yield SSE.patch_elements("<div id='mydiv'></div>")
-        await asyncio.sleep(1)
-return DatastarResponse(updates())
+    async def _():
+        while True:
+            yield SSE.patch_elements("<div id='mydiv'></div>")
+            await asyncio.sleep(1)
+    return DatastarResponse(_())
 
 # A long lived stream for sanic
-response = await datastar_respond(request)
-# which is just a helper for the following
-# response = await request.respond(DatastarResponse())
-while True:
-    await response.send(SSE.patch_elements("<div id='mydiv'></div>"))
-    await asyncio.sleep(1)
+@app.get("/updates")
+async def updates(request):
+    response = await datastar_respond(request)
+    # which is just a helper for the following
+    # response = await request.respond(DatastarResponse())
+    while True:
+        await response.send(SSE.patch_elements("<div id='mydiv'></div>"))
+        await asyncio.sleep(1)
 ```
 
 ### Response Decorator
@@ -109,7 +139,7 @@ def my_route(request):
 ```
 
 ## Signal Helpers
-The current state of the datastar signals is included by default in every 
+The current state of the datastar signals is included by default in every
 datastar request. A helper is included to load those signals for each
 framework. `read_signals`
 
@@ -132,9 +162,8 @@ from datastar_py import attribute_generator as data
 # htpy
 button(data.on("click", "console.log('clicked')").debounce(1000).stop)["My Button"]
 # FastHTML
-Button("My Button", **data.on("click", "console.log('clicked')").debounce(1000).stop)
-# After next release of FastHTML you don't have to unpack the datastar helpers e.g.
 Button("My Button", data.on("click", "console.log('clicked')").debounce(1000).stop)
+Button(data.on("click", "console.log('clicked')").debounce(1000).stop)("My Button")
 # f-strings
 f"<button {data.on("click", "console.log('clicked')").debounce(1000).stop}>My Button</button>"
 # Jinja, but no editor completion :(
