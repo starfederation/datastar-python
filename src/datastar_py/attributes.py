@@ -4,7 +4,10 @@ import json
 import re
 from collections.abc import Iterable, Iterator, Mapping
 from itertools import chain
-from typing import Literal, Self, TypeAlias, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Literal, TypeAlias, Union, overload
+
+if TYPE_CHECKING:
+    from typing import Self
 
 __all__ = ["attribute_generator"]
 
@@ -379,17 +382,14 @@ class BaseAttr(Mapping):
     __html__ = __str__
 
 
-TAttr = TypeVar("TAttr", bound=BaseAttr)
-
-
 class TimingMod:
     def debounce(
-        self: TAttr,
+        self: Self,
         wait: int | float | str,
         *,
         leading: bool = False,
         notrail: bool = False,
-    ) -> TAttr:
+    ) -> Self:
         """Debounce the event listener.
 
         :param wait: The minimum interval between events.
@@ -406,12 +406,12 @@ class TimingMod:
         return self
 
     def throttle(
-        self: TAttr,
+        self: Self,
         wait: int | float | str,
         *,
         noleading: bool = False,
         trail: bool = False,
-    ) -> TAttr:
+    ) -> Self:
         """Throttle the event listener.
 
         :param wait: The minimum interval between events.
@@ -430,7 +430,7 @@ class TimingMod:
 
 class ViewtransitionMod:
     @property
-    def viewtransition(self: TAttr) -> TAttr:
+    def viewtransition(self: Self) -> Self:
         """Wrap the expression in document.startViewTransition()."""
         self._mods["view-transition"] = []
         return self
