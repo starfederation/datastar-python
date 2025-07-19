@@ -21,50 +21,65 @@ helpers included for the following frameworks:
 * [Sanic](https://sanic.dev/en/)
 * [Starlette](https://www.starlette.io/)
 
-## Event Generation Helpers
+Framework-specific helpers are kept in their own packages. e.g. `datastar_py.quart`
+Make sure to use the helpers from the package of the framework you are using.
 
-To use `datastar-py`, import the SSE generator in your app and then use
-it in your route handler:
+Here is a full example using the quart framework showing many of the features
+available in this package.
 
 ```python
 import asyncio
-
-from datastar_py import ServerSentEventGenerator as SSE
-from datastar_py.sse import SSE_HEADERS
-from quart import Quart, make_response
 from datetime import datetime
+
+from datastar_py import ServerSentEventGenerator as SSE, attribute_generator as data
+from datastar_py.quart import datastar_response, read_signals
+from quart import Quart
 
 app = Quart(__name__)
 
 # Import frontend library via Content Distribution Network, create targets for Server Sent Events
 @app.route("/")
 def index():
-    return '''
-    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
-    <span data-on-load="@get('/updates')" id="currentTime"></span><br><span data-text="$currentTime"></div>
-    '''
+    return f"""
+        <html>
+            <head>
+                <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+            </head>
+            <body {data.on_load("@get('/updates')")}>
+                <span id="currentTime"></span><br>
+                <span data-text="$currentTime"></span>
+            </body>
+        </html>
+    """
 
 
 @app.route("/updates")
+@datastar_response
 async def updates():
-    async def time_updates():
-        while True:
-            yield SSE.patch_elements(
-                f"""<span id="currentTime">{datetime.now().isoformat()}"""
-            )
-            await asyncio.sleep(1)
-            yield SSE.patch_signals({"currentTime": f"{datetime.now().isoformat()}"})
-            await asyncio.sleep(1)
-
-    response = await make_response(time_updates(), SSE_HEADERS)
-    response.timeout = None
-    return response
+    # Retrieve a dictionary with the current state of the signals from the frontend
+    signals = await read_signals()
+    # Alternate updating an element from the backend, and updating a signal from the backend
+    while True:
+        yield SSE.patch_elements(
+            f"""<span id="currentTime">{datetime.now().isoformat()}"""
+        )
+        await asyncio.sleep(1)
+        yield SSE.patch_signals({"currentTime": f"{datetime.now().isoformat()}"})
+        await asyncio.sleep(1)
 
 
 app.run()
 ```
 
-The example above is for the Quart framework, and is only using the event generation helpers.
+Starting examples for each framework can be found in the [examples](/examples)
+directory.
+
+## Event Generation Helpers
+
+This helper is used to generate the actual events that are sent over SSE. They
+are just text blobs that can be sent using any framework. These can even be
+used by frameworks not directly supported in this library if you set up the
+headers of the SSE response yourself.
 
 ## Response Helpers
 
@@ -77,7 +92,7 @@ e.g. `from datastar_py.quart import DatastarResponse` The containing functions
 are not shown here, as they will differ per framework.
 
 ```python
-# per framework Response import, eg:
+# per framework Response import. (Replace 'fastapi' with your framework.) e.g.:
 # from datastar_py.fastapi import DatastarResponse
 from datastar_py import ServerSentEventGenerator as SSE
 
@@ -98,7 +113,6 @@ def two_event():
     ])
 
 # N events, a long lived stream (for all frameworks but sanic)
-
 @app.get("/updates")
 async def updates():
     async def _():
@@ -128,11 +142,12 @@ works the same for any of the supported frameworks, and should be used under
 any routing decorator from the framework.
 
 ```python
+# Import the decorator from the package specific to your framework
 from datastar_py.sanic import datastar_response, ServerSentEventGenerator as SSE
 
 @app.get('/my_route')
 @datastar_response
-def my_route(request):
+async def my_route(request):
     while True:
         yield SSE.patch_elements("<div id='mydiv'></div>")
         await asyncio.sleep(1)
@@ -141,7 +156,8 @@ def my_route(request):
 ## Signal Helpers
 The current state of the datastar signals is included by default in every
 datastar request. A helper is included to load those signals for each
-framework. `read_signals`
+framework. `read_signals`. The usage varies per framework so check the
+signature for your framework. You usually need to pass the request in.
 
 ```python
 from datastar_py.quart import read_signals
