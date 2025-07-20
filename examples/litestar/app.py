@@ -2,6 +2,7 @@
 # dependencies = [
 #   "datastar-py",
 #   "litestar",
+#   "uvicorn",
 # ]
 # [tool.uv.sources]
 # datastar-py = { path = "../../" }

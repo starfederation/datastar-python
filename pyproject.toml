@@ -38,6 +38,7 @@ urls.GitHub = "https://github.com/starfederation/datastar-python"
 
 [dependency-groups]
 dev = [
+  "daphne>=4.2.1",
   "django>=4.2.17",
   "fastapi[standard]>=0.115.4",
   "flask[async]>=3.0.3",
