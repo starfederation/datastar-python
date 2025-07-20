@@ -8,7 +8,7 @@ The following commands assume you are running them from the root of the reposito
 
 ### Django
 
-We use the `--with` argument to declare depdencies to run our Django app.
+We use the `--with` argument to declare dependencies to run our Django app.
 
 ```sh
 uv run --with django --with daphne ./examples/django/manage.py runserver
