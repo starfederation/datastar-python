@@ -256,6 +256,11 @@ class AttributeGenerator:
         """Show or hides an element based on whether an expression evaluates to true or false."""
         return BaseAttr("show", value=expression, alias=self._alias)
 
+    def style(self, style_dict: Mapping | None = None, /, **styles: str) -> BaseAttr:
+        """Sets the value of inline CSS styles on an element based on an expression, and keeps them in sync."""
+        styles = {**(style_dict if style_dict else {}), **styles}
+        return BaseAttr("style", value=_js_object(styles), alias=self._alias)
+
     def text(self, expression: str) -> BaseAttr:
         """Bind the text content of an element to an expression."""
         return BaseAttr("text", value=expression, alias=self._alias)
