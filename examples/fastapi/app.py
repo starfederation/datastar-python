@@ -12,14 +12,14 @@ import asyncio
 from datetime import datetime
 
 import uvicorn
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+
 from datastar_py.fastapi import (
     DatastarResponse,
     ReadSignals,
     ServerSentEventGenerator,
 )
-
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 

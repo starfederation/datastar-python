@@ -8,7 +8,18 @@ name = "datastar-py"
 version = "0.6.3"
 description = "Helper functions and classes for the Datastar library (https://data-star.dev/)"
 readme = "README.md"
-keywords = [ "datastar", "django", "fastapi", "fasthtml", "flask", "html", "litestar", "quart", "sanic", "starlette" ]
+keywords = [
+  "datastar",
+  "django",
+  "fastapi",
+  "fasthtml",
+  "flask",
+  "html",
+  "litestar",
+  "quart",
+  "sanic",
+  "starlette",
+]
 license = "MIT"
 license-files = [ "LICENSE.md" ]
 authors = [
@@ -37,18 +48,7 @@ urls.Documentation = "https://github.com/starfederation/datastar-python/blob/dev
 urls.GitHub = "https://github.com/starfederation/datastar-python"
 
 [dependency-groups]
-dev = [
-  "django>=4.2.17",
-  "fastapi[standard]>=0.115.4",
-  "flask[async]>=3.0.3",
-  "litestar>=2.15.2",
-  "pre-commit>=4.2",
-  "python-fasthtml>=0.12; python_version>'3.10'",
-  "quart>=0.19.9",
-  "sanic>=24.6",
-  "starlette>=0.46.1",
-  "uvicorn>=0.32.1",
-]
+dev = [ "pre-commit>=4.2" ]
 
 [tool.ruff]
 line-length = 99
@@ -72,3 +72,5 @@ lint.select = [
 ]
 lint.ignore = [ "E501" ]
 lint.fixable = [ "ALL" ]
+
+per-file-ignores."examples/**/*.py" = [ "ANN" ]

@@ -10,13 +10,13 @@
 import asyncio
 from datetime import datetime
 
+from quart import Quart
+
 from datastar_py.quart import (
     DatastarResponse,
     ServerSentEventGenerator,
     read_signals,
 )
-
-from quart import Quart
 
 app = Quart(__name__)
 

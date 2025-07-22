@@ -2,6 +2,7 @@
 # dependencies = [
 #   "datastar-py",
 #   "litestar",
+#   "uvicorn",
 # ]
 # [tool.uv.sources]
 # datastar-py = { path = "../../" }
@@ -12,15 +13,15 @@ from collections.abc import AsyncGenerator
 from datetime import datetime
 
 import uvicorn
+from litestar import Litestar, MediaType, get
+from litestar.di import Provide
+
 from datastar_py.litestar import (
     DatastarResponse,
     ServerSentEventGenerator,
     read_signals,
 )
 from datastar_py.sse import DatastarEvent
-
-from litestar import Litestar, MediaType, get
-from litestar.di import Provide
 
 HTML = """\
 	<!DOCTYPE html>
