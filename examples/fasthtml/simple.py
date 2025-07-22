@@ -11,10 +11,10 @@ import asyncio
 import json
 from datetime import datetime
 
-from datastar_py.fasthtml import DatastarResponse, ServerSentEventGenerator, read_signals
-
 # ruff: noqa: F403, F405
 from fasthtml.common import *
+
+from datastar_py.fasthtml import DatastarResponse, ServerSentEventGenerator, read_signals
 
 app, rt = fast_app(
     htmx=False,

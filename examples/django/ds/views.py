@@ -2,13 +2,13 @@ import asyncio
 import time
 from datetime import datetime
 
+from django.http import HttpResponse
+
 from datastar_py.django import (
     DatastarResponse,
     ServerSentEventGenerator,
     read_signals,
 )
-
-from django.http import HttpResponse
 
 # ASGI Example
 

@@ -10,6 +10,9 @@
 import asyncio
 from datetime import datetime
 
+from sanic import Sanic
+from sanic.response import html
+
 from datastar_py.consts import ElementPatchMode
 from datastar_py.sanic import (
     DatastarResponse,
@@ -17,9 +20,6 @@ from datastar_py.sanic import (
     datastar_respond,
     read_signals,
 )
-
-from sanic import Sanic
-from sanic.response import html
 
 app = Sanic("DataStarApp")
 

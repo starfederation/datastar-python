@@ -72,3 +72,6 @@ lint.select = [
 ]
 lint.ignore = ["E501"]
 lint.fixable = ["ALL"]
+
+[tool.ruff.per-file-ignores]
+"examples/**/*.py" = ["ANN"]

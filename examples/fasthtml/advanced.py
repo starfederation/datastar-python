@@ -16,12 +16,13 @@ import json
 from datetime import datetime
 
 import polars as pl
-from datastar_py.fasthtml import DatastarResponse, ServerSentEventGenerator
-from great_tables import GT
-from great_tables.data import reactions
 
 # ruff: noqa: F403, F405
 from fasthtml.common import *
+from great_tables import GT
+from great_tables.data import reactions
+
+from datastar_py.fasthtml import DatastarResponse, ServerSentEventGenerator
 
 ######################################################################################################
 # This demo shows how FastHTML can be integrated with Datastar for server-driven interaction with a  #
