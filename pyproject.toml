@@ -1,75 +1,74 @@
 [build-system]
 build-backend = "hatchling.build"
 
-requires = [ "hatchling" ]
+requires = ["hatchling"]
 
 [project]
 name = "datastar-py"
 version = "0.6.3"
 description = "Helper functions and classes for the Datastar library (https://data-star.dev/)"
 readme = "README.md"
-keywords = [ "datastar", "django", "fastapi", "fasthtml", "flask", "html", "litestar", "quart", "sanic", "starlette" ]
+keywords = [
+    "datastar",
+    "django",
+    "fastapi",
+    "fasthtml",
+    "flask",
+    "html",
+    "litestar",
+    "quart",
+    "sanic",
+    "starlette",
+]
 license = "MIT"
-license-files = [ "LICENSE.md" ]
+license-files = ["LICENSE.md"]
 authors = [
-  { name = "Felix Ingram", email = "f.ingram@gmail.com" },
-  { name = "Lucian Knock", email = "git@lucianknock.com" },
-  { name = "Chase Sterling", email = "chase.sterling@gmail.com" },
+    { name = "Felix Ingram", email = "f.ingram@gmail.com" },
+    { name = "Lucian Knock", email = "git@lucianknock.com" },
+    { name = "Chase Sterling", email = "chase.sterling@gmail.com" },
 ]
 requires-python = ">=3.9"
 classifiers = [
-  "Development Status :: 4 - Beta",
-  "Environment :: Web Environment",
-  "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
-dependencies = [  ]
+dependencies = []
 urls.Documentation = "https://github.com/starfederation/datastar-python/blob/develop/README.md"
 urls.GitHub = "https://github.com/starfederation/datastar-python"
 
 [dependency-groups]
-dev = [
-  "daphne>=4.2.1",
-  "django>=4.2.17",
-  "fastapi[standard]>=0.115.4",
-  "flask[async]>=3.0.3",
-  "litestar>=2.15.2",
-  "pre-commit>=4.2",
-  "python-fasthtml>=0.12; python_version>'3.10'",
-  "quart>=0.19.9",
-  "sanic>=24.6",
-  "starlette>=0.46.1",
-  "uvicorn>=0.32.1",
-]
+dev = ["pre-commit>=4.2"]
 
 [tool.ruff]
 line-length = 99
 lint.select = [
-  # Annotations
-  "ANN",
-  # flake8-bugbear
-  "B",
-  # pycodestyle
-  "E",
-  # Pyflakes
-  "F",
-  # isort
-  "I",
-  # Ruff specific
-  "RUF",
-  # flake8-simplify
-  "SIM",
-  # pyupgrade
-  "UP",
+    # Annotations
+    "ANN",
+    # flake8-bugbear
+    "B",
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # isort
+    "I",
+    # Ruff specific
+    "RUF",
+    # flake8-simplify
+    "SIM",
+    # pyupgrade
+    "UP",
 ]
-lint.ignore = [ "E501" ]
-lint.fixable = [ "ALL" ]
+lint.ignore = ["E501"]
+lint.fixable = ["ALL"]
