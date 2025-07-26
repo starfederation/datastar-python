@@ -111,6 +111,33 @@ SignalValue: TypeAlias = Union[
 ]
 
 
+class JSExpression(str):
+    MARKER = "_!EXPR!_"
+    REPLACEMENT = ""
+
+    def __new__(cls, value: str) -> Self:
+        return str.__new__(cls, f"{cls.MARKER}{value}{cls.MARKER}")
+
+
+class JSRegex(str):
+    MARKER = "_!REGEX!_"
+    REPLACEMENT = "/"
+
+    def __new__(cls, value: str) -> Self:
+        return str.__new__(cls, f"{cls.MARKER}{value}{cls.MARKER}")
+
+
+def _js_object(obj: dict) -> str:
+    """Create a JS object where the values can be JS expressions or regex."""
+    result = json.dumps(obj)
+    return (
+        result.replace(f'"{JSExpression.MARKER}', JSExpression.REPLACEMENT)
+        .replace(f'{JSExpression.MARKER}"', JSExpression.REPLACEMENT)
+        .replace(f'"{JSRegex.MARKER}', JSRegex.REPLACEMENT)
+        .replace(f'{JSRegex.MARKER}"', JSRegex.REPLACEMENT)
+    )
+
+
 class AttributeGenerator:
     def __init__(self, alias: str = "data-") -> None:
         """A helper which can generate all the Datastar attributes.
@@ -134,7 +161,11 @@ class AttributeGenerator:
             rather than literals.
         """
         signals = {**(signals_dict if signals_dict else {}), **signals}
-        val = _js_object(signals) if expressions_ else json.dumps(signals)
+        val = (
+            _js_object({k: JSExpression(v) for k, v in signals.items()})
+            if expressions_
+            else json.dumps(signals)
+        )
         return SignalsAttr(value=val, alias=self._alias)
 
     def computed(self, computed_dict: Mapping | None = None, /, **computed: str) -> BaseAttr:
@@ -159,7 +190,11 @@ class AttributeGenerator:
     def attr(self, attr_dict: Mapping | None = None, /, **attrs: str) -> BaseAttr:
         """Set the value of any HTML attributes to expressions, and keep them in sync."""
         attrs = {**(attr_dict if attr_dict else {}), **attrs}
-        return BaseAttr("attr", value=_js_object(attrs), alias=self._alias)
+        return BaseAttr(
+            "attr",
+            value=_js_object({k: JSExpression(v) for k, v in attrs.items()}),
+            alias=self._alias,
+        )
 
     def bind(self, signal_name: str) -> BaseAttr:
         """Set up two-way data binding between a signal and an element's value."""
@@ -168,7 +203,11 @@ class AttributeGenerator:
     def class_(self, class_dict: Mapping | None = None, /, **classes: str) -> BaseAttr:
         """Add or removes classes to or from an element based on expressions."""
         classes = {**(class_dict if class_dict else {}), **classes}
-        return BaseAttr("class", value=_js_object(classes), alias=self._alias)
+        return BaseAttr(
+            "class",
+            value=_js_object({k: JSExpression(v) for k, v in classes.items()}),
+            alias=self._alias,
+        )
 
     @overload
     def on(self, event: Literal["interval"], expression: str) -> OnIntervalAttr: ...
@@ -259,7 +298,11 @@ class AttributeGenerator:
     def style(self, style_dict: Mapping | None = None, /, **styles: str) -> BaseAttr:
         """Sets the value of inline CSS styles on an element based on an expression, and keeps them in sync."""
         styles = {**(style_dict if style_dict else {}), **styles}
-        return BaseAttr("style", value=_js_object(styles), alias=self._alias)
+        return BaseAttr(
+            "style",
+            value=_js_object({k: JSExpression(v) for k, v in styles.items()}),
+            alias=self._alias,
+        )
 
     def text(self, expression: str) -> BaseAttr:
         """Bind the text content of an element to an expression."""
@@ -725,18 +768,6 @@ def _escape(s: str) -> str:
         .replace('"', "&#34;")
         .replace(">", "&gt;")
         .replace("<", "&lt;")
-    )
-
-
-def _js_object(obj: dict) -> str:
-    """Create a JS object where the values are expressions rather than strings."""
-    return (
-        "{"
-        + ", ".join(
-            f"{json.dumps(k)}: {_js_object(v) if isinstance(v, dict) else v}"
-            for k, v in obj.items()
-        )
-        + "}"
     )
 
 
