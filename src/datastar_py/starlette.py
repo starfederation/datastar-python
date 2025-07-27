@@ -27,7 +27,7 @@ __all__ = [
 
 
 class DatastarResponse(_StreamingResponse):
-    """Respond with 0..N `DatastarEvent`s"""
+    """Respond with 0..N `DatastarEvent`s."""
 
     default_headers: dict[str, str] = SSE_HEADERS.copy()
 

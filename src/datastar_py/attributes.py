@@ -257,7 +257,7 @@ class AttributeGenerator:
         return BaseAttr("show", value=expression, alias=self._alias)
 
     def style(self, style_dict: Mapping | None = None, /, **styles: str) -> BaseAttr:
-        """Sets the value of inline CSS styles on an element based on an expression, and keeps them in sync."""
+        """Set the value of inline CSS styles on an element based on an expression, and keeps them in sync."""
         styles = {**(style_dict if style_dict else {}), **styles}
         return BaseAttr("style", value=_js_object(styles), alias=self._alias)
 
