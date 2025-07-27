@@ -1,5 +1,4 @@
-"""
-ASGI config for datastar project.
+"""ASGI config for datastar project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

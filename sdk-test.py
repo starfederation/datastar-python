@@ -8,8 +8,8 @@
 # datastar-py = { path = "." }
 # ///
 
-"""
-Runs a test server that the SDK tests can be run against.
+"""Runs a test server that the SDK tests can be run against.
+
 1. Start this server with `uv run sdk-test.py`
 2. Move to the sdk/tests folder.
 3. Run `test-all.sh http://127.0.0.1:8000` to run the tests.

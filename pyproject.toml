@@ -56,6 +56,7 @@ lint.select = [
   "ANN",
   # flake8-bugbear
   "B",
+  "D",
   # pycodestyle
   "E",
   # Pyflakes
@@ -69,7 +70,19 @@ lint.select = [
   # pyupgrade
   "UP",
 ]
-lint.ignore = [ "E501" ]
+lint.ignore = [
+  "D100", # undocumented-public-module
+  "D101", # undocumented-public-class
+  "D102", # undocumented-public-method
+  "D103", # undocumented-public-function
+  "D104", # undocumented-public-package
+  "D107", # undocumented-public-init
+  "D203", # Conflicting with other rules
+  "D213", # Conflicting with other rules
+  "D401", # non-imperative-mood
+  "D415", # Duplicate of D400
+  "E501",
+]
 lint.fixable = [ "ALL" ]
 
 per-file-ignores."examples/**/*.py" = [ "ANN" ]

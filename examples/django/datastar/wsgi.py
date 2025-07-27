@@ -1,5 +1,4 @@
-"""
-WSGI config for datastar project.
+"""WSGI config for datastar project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -20,7 +19,7 @@ if settings.DEBUG:
     original_is_hop_by_hop = wsgiref.handlers.is_hop_by_hop
 
     def custom_is_hop_by_hop(header_name):
-        """Permit the "connection" header over WSGI
+        """Permit the "connection" header over WSGI.
 
         Datastar by default, sets the connection header to "keep-alive".
         Per the WSGI spec (see below), wsgiref does not permit setting

@@ -21,7 +21,8 @@ class _HtmlProvider(Protocol):
 
     This is a convention used by html producing/consuming libraries. This lets
     e.g. fasthtml fasttags, or htpy elements, be passed straight in to
-    merge_fragments."""
+    merge_fragments.
+    """
 
     def __html__(self) -> str: ...
 
