@@ -440,7 +440,7 @@ class DelayMod:
     ) -> Self:
         """Delay the event listener.
 
-        :param wait: The minimum interval between events.
+        :param wait: The delay time.
         """
         self._mods["delay"] = [str(wait)]
         return self
