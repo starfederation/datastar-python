@@ -433,6 +433,19 @@ class TimingMod:
         return self
 
 
+class DelayMod:
+    def delay(
+        self: Self,
+        wait: int | float | str,
+    ) -> Self:
+        """Delay the event listener.
+
+        :param wait: The delay time.
+        """
+        self._mods["delay"] = [str(wait)]
+        return self
+
+
 class ViewtransitionMod:
     @property
     def viewtransition(self: Self) -> Self:
@@ -461,7 +474,7 @@ class IgnoreAttr(BaseAttr):
         return self
 
 
-class OnAttr(BaseAttr, TimingMod, ViewtransitionMod):
+class OnAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
     _attr = "on"
 
     @property
@@ -628,7 +641,7 @@ class ScrollIntoViewAttr(BaseAttr):
         return self
 
 
-class OnIntersectAttr(BaseAttr, TimingMod, ViewtransitionMod):
+class OnIntersectAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
     @property
     def once(self) -> Self:
         """Only trigger the event listener once."""
@@ -659,13 +672,8 @@ class OnIntervalAttr(BaseAttr, ViewtransitionMod):
         return self
 
 
-class OnLoadAttr(BaseAttr, ViewtransitionMod):
+class OnLoadAttr(BaseAttr, ViewtransitionMod, DelayMod):
     _attr = "on-load"
-
-    def delay(self, delay: int | float | str) -> Self:
-        """Delay the event listener."""
-        self._mods["delay"] = [str(delay)]
-        return self
 
     @property
     def once(self) -> Self:
@@ -678,7 +686,7 @@ class OnRafAttr(BaseAttr, TimingMod):
     _attr = "on-raf"
 
 
-class OnSignalPatchAttr(BaseAttr, TimingMod):
+class OnSignalPatchAttr(BaseAttr, TimingMod, DelayMod):
     _attr = "on-signal-patch"
 
     def filter(self, include: str | None = None, exclude: str | None = None) -> Self:
