@@ -111,6 +111,9 @@ SignalValue: TypeAlias = Union[
 ]
 
 
+WaitTime: TypeAlias = Union[int, float, str]
+
+
 class AttributeGenerator:
     def __init__(self, alias: str = "data-") -> None:
         """A helper which can generate all the Datastar attributes.
@@ -390,7 +393,7 @@ class BaseAttr(Mapping):
 class TimingMod:
     def debounce(
         self: Self,
-        wait: int | float | str,
+        wait: WaitTime,
         *,
         leading: bool = False,
         notrail: bool = False,
@@ -403,7 +406,7 @@ class TimingMod:
         :param notrail: If True, the event listener will not be called on the trailing edge of the
             wait time.
         """
-        self._mods["debounce"] = [str(wait)]
+        self._mods["debounce"] = [_format_wait_time(wait)]
         if leading:
             self._mods["debounce"].append("leading")
         if notrail:
@@ -412,7 +415,7 @@ class TimingMod:
 
     def throttle(
         self: Self,
-        wait: int | float | str,
+        wait: WaitTime,
         *,
         noleading: bool = False,
         trail: bool = False,
@@ -425,7 +428,7 @@ class TimingMod:
         :param trail: If true, the event listener will be called on the trailing edge of the
             wait time.
         """
-        self._mods["throttle"] = [str(wait)]
+        self._mods["throttle"] = [_format_wait_time(wait)]
         if noleading:
             self._mods["throttle"].append("noleading")
         if trail:
@@ -436,13 +439,13 @@ class TimingMod:
 class DelayMod:
     def delay(
         self: Self,
-        wait: int | float | str,
+        wait: WaitTime,
     ) -> Self:
         """Delay the event listener.
 
         :param wait: The minimum interval between events.
         """
-        self._mods["delay"] = [str(wait)]
+        self._mods["delay"] = [_format_wait_time(wait)]
         return self
 
 
@@ -664,9 +667,9 @@ class OnIntersectAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
 class OnIntervalAttr(BaseAttr, ViewtransitionMod):
     _attr = "on-interval"
 
-    def duration(self, duration: int | float | str, *, leading: bool = False) -> Self:
+    def duration(self, duration: WaitTime, *, leading: bool = False) -> Self:
         """Set the interval duration."""
-        self._mods["duration"] = [str(duration)]
+        self._mods["duration"] = [_format_wait_time(duration)]
         if leading:
             self._mods["duration"].append("leading")
         return self
@@ -745,6 +748,34 @@ def _js_object(obj: dict) -> str:
             for k, v in obj.items()
         )
         + "}"
+    )
+
+
+def _format_wait_time(wait: WaitTime) -> str:
+    if isinstance(wait, int):
+        return f"{wait}ms"
+    
+    if isinstance(wait, float):
+        return f"{int(wait * 1000)}ms"
+    
+    if isinstance(wait, str):
+        s = wait.strip().lower()
+        if s.endswith("ms"):
+            num, unit = s[:-2], "ms"
+        elif s.endswith("s"):
+            num, unit = s[:-1], "s"
+        else:
+            num, unit = s, "ms"
+
+        if num.isdigit():
+            return f"{num}{unit}"
+
+        raise ValueError(
+            f"Invalid wait time: {wait!r}, expected format: {{int}}ms, {{int}}s, or {{int}}"
+        )
+    
+    raise ValueError(
+        f"Invalid wait time: {wait!r}, expected int, float, or str in format {{int}}ms, {{int}}s, or {{int}}"
     )
 
 
