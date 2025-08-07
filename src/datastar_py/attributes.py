@@ -642,6 +642,8 @@ class ScrollIntoViewAttr(BaseAttr):
 
 
 class OnIntersectAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
+    _attr = "on-intersect"
+
     @property
     def once(self) -> Self:
         """Only trigger the event listener once."""
