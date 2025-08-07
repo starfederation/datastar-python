@@ -390,7 +390,7 @@ class BaseAttr(Mapping):
 class TimingMod:
     def debounce(
         self: Self,
-        wait: int | float | str,
+        wait: int | str,
         *,
         leading: bool = False,
         notrail: bool = False,
@@ -412,7 +412,7 @@ class TimingMod:
 
     def throttle(
         self: Self,
-        wait: int | float | str,
+        wait: int | str,
         *,
         noleading: bool = False,
         trail: bool = False,
@@ -436,7 +436,7 @@ class TimingMod:
 class DelayMod:
     def delay(
         self: Self,
-        wait: int | float | str,
+        wait: int | str,
     ) -> Self:
         """Delay the event listener.
 
