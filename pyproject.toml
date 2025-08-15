@@ -5,7 +5,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "datastar-py"
-version = "0.6.4"
+version = "0.6.5"
 description = "Helper functions and classes for the Datastar library (https://data-star.dev/)"
 readme = "README.md"
 keywords = [
@@ -83,6 +83,5 @@ lint.ignore = [
   "D415", # Duplicate of D400
   "E501",
 ]
+lint.per-file-ignores."examples/**/*.py" = [ "ANN" ]
 lint.fixable = [ "ALL" ]
-
-per-file-ignores."examples/**/*.py" = [ "ANN" ]
