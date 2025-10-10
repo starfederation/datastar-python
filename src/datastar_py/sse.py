@@ -67,7 +67,7 @@ class ServerSentEventGenerator:
         *,
         selector: str,
         mode: Literal[consts.ElementPatchMode.REMOVE],
-        use_view_transitions: bool | None = None,
+        use_view_transition: bool | None = None,
         event_id: str | None = None,
         retry_duration: int | None = None,
     ) -> DatastarEvent: ...
@@ -78,7 +78,7 @@ class ServerSentEventGenerator:
         elements: str | _HtmlProvider,
         selector: str | None = None,
         mode: consts.ElementPatchMode | None = None,
-        use_view_transitions: bool | None = None,
+        use_view_transition: bool | None = None,
         event_id: str | None = None,
         retry_duration: int | None = None,
     ) -> DatastarEvent: ...
