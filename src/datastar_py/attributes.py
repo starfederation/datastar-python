@@ -4,7 +4,7 @@ import json
 import re
 from collections.abc import Iterable, Iterator, Mapping
 from itertools import chain
-from typing import TYPE_CHECKING, Literal, TypeAlias, Union, overload
+from typing import TYPE_CHECKING, Literal, TypeAlias, Union
 
 if TYPE_CHECKING:
     from typing import Self
@@ -170,53 +170,17 @@ class AttributeGenerator:
         classes = {**(class_dict if class_dict else {}), **classes}
         return BaseAttr("class", value=_js_object(classes), alias=self._alias)
 
-    @overload
-    def on(self, event: Literal["interval"], expression: str) -> OnIntervalAttr: ...
-    @overload
-    def on(self, event: Literal["load"], expression: str) -> OnLoadAttr: ...
-    @overload
-    def on(self, event: Literal["intersect"], expression: str) -> OnIntersectAttr: ...
-    @overload
-    def on(self, event: Literal["raf"], expression: str) -> OnRafAttr: ...
-    @overload
-    def on(self, event: Literal["resize"], expression: str) -> OnResizeAttr: ...
-    @overload
-    def on(self, event: Literal["signal-patch"], expression: str) -> OnSignalPatchAttr: ...
-    @overload
-    def on(self, event: JSEvent | str, expression: str) -> OnAttr: ...
-    def on(
-        self, event: str, expression: str
-    ) -> (
-        OnAttr
-        | OnIntervalAttr
-        | OnLoadAttr
-        | OnIntersectAttr
-        | OnRafAttr
-        | OnResizeAttr
-        | OnSignalPatchAttr
-    ):
+    def init(self, expression: str) -> InitAttr:
+        """Execute an expression when the element is loaded into the DOM."""
+        return InitAttr(value=expression, alias=self._alias)
+
+    def on(self, event: JSEvent | str, expression: str) -> OnAttr:
         """Execute an expression when an event occurs."""
-        if event == "interval":
-            return OnIntervalAttr(value=expression, alias=self._alias)
-        if event == "load":
-            return OnLoadAttr(value=expression, alias=self._alias)
-        if event == "raf":
-            return OnRafAttr(value=expression, alias=self._alias)
-        if event == "resize":
-            return OnResizeAttr(value=expression, alias=self._alias)
-        if event == "intersect":
-            return OnIntersectAttr(value=expression, alias=self._alias)
-        if event == "signal-patch":
-            return OnSignalPatchAttr(value=expression, alias=self._alias)
         return OnAttr(key=event, value=expression, alias=self._alias)
 
     def on_interval(self, expression: str) -> OnIntervalAttr:
         """Execute an expression at a regular interval."""
         return OnIntervalAttr(value=expression, alias=self._alias)
-
-    def on_load(self, expression: str) -> OnLoadAttr:
-        """Execute an expression when the element is loaded into the DOM."""
-        return OnLoadAttr(value=expression, alias=self._alias)
 
     def on_intersect(self, expression: str) -> OnIntersectAttr:
         """Execute an expression when the element intersects with the viewport."""
@@ -333,7 +297,7 @@ class BaseAttr(Mapping):
     def _full_key(self) -> str:
         key = f"{self._alias}{self._attr}"
         if self._key:
-            key += f"-{self._key}"
+            key += f":{self._key}"
         for mod, values in self._mods.items():
             key += f"__{mod}"
             if values:
@@ -341,9 +305,8 @@ class BaseAttr(Mapping):
         return key
 
     def _to_kebab_key(self, key_name: str) -> None:
-        if "-" in key_name:
-            kebab_name, from_case = key_name.lower(), "kebab"
-        elif "_" in key_name:
+        if "__" in key_name:
+            # _ are allowed in attributes, the only time we need to convert is if there are multiple underscores
             kebab_name, from_case = key_name.lower().replace("_", "-"), "snake"
         elif key_name[0].isupper():
             kebab_name, from_case = (
@@ -356,7 +319,8 @@ class BaseAttr(Mapping):
                 "camel",
             )
         else:
-            kebab_name, from_case = key_name, None
+            # kebab case means the raw name from the attribute will be passed through
+            kebab_name, from_case = key_name, "kebab"
         self._key = kebab_name
         if from_case:
             self._mods["case"] = [from_case]
@@ -393,21 +357,21 @@ class TimingMod:
         wait: int | str,
         *,
         leading: bool = False,
-        notrail: bool = False,
+        notrailing: bool = False,
     ) -> Self:
         """Debounce the event listener.
 
         :param wait: The minimum interval between events.
         :param leading: If True, the event listener will be called on the leading edge of the
             wait time.
-        :param notrail: If True, the event listener will not be called on the trailing edge of the
+        :param notrailing: If True, the event listener will not be called on the trailing edge of the
             wait time.
         """
         self._mods["debounce"] = [str(wait)]
         if leading:
             self._mods["debounce"].append("leading")
-        if notrail:
-            self._mods["debounce"].append("notrail")
+        if notrailing:
+            self._mods["debounce"].append("notrailing")
         return self
 
     def throttle(
@@ -415,21 +379,21 @@ class TimingMod:
         wait: int | str,
         *,
         noleading: bool = False,
-        trail: bool = False,
+        trailing: bool = False,
     ) -> Self:
         """Throttle the event listener.
 
         :param wait: The minimum interval between events.
         :param noleading: If true, the event listener will not be called on the leading edge of the
             wait time.
-        :param trail: If true, the event listener will be called on the trailing edge of the
+        :param trailing: If true, the event listener will be called on the trailing edge of the
             wait time.
         """
         self._mods["throttle"] = [str(wait)]
         if noleading:
             self._mods["throttle"].append("noleading")
-        if trail:
-            self._mods["throttle"].append("trail")
+        if trailing:
+            self._mods["throttle"].append("trailing")
         return self
 
 
@@ -672,8 +636,8 @@ class OnIntervalAttr(BaseAttr, ViewtransitionMod):
         return self
 
 
-class OnLoadAttr(BaseAttr, ViewtransitionMod, DelayMod):
-    _attr = "on-load"
+class InitAttr(BaseAttr, ViewtransitionMod, DelayMod):
+    _attr = "init"
 
     @property
     def once(self) -> Self:
