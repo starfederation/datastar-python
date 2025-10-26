@@ -18,7 +18,7 @@ HTML_ASGI = """\
         <head>
             <title>DATASTAR on Django (ASGI)</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-            <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+            <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-RC.6/bundles/datastar.js"></script>
             <style>
             html, body { height: 100%; width: 100%; }
             body { background-image: linear-gradient(to right bottom, oklch(0.424958 0.052808 253.972015), oklch(0.189627 0.038744 264.832977)); }
@@ -30,7 +30,7 @@ HTML_ASGI = """\
         <div class="container">
             <div
             class="time"
-            data-on-load="@get('/updates')"
+            data-init="@get('/updates')"
             >
             Current time from element: <span id="currentTime">CURRENT_TIME</span>
             </div>
@@ -76,7 +76,7 @@ HTML_WSGI = """\
         <head>
             <title>DATASTAR on Django (WSGI)</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-            <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+            <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-RC.6/bundles/datastar.js"></script>
             <style>
             html, body { height: 100%; width: 100%; }
             body { background-image: linear-gradient(to right bottom, oklch(0.424958 0.052808 253.972015), oklch(0.189627 0.038744 264.832977)); }
@@ -90,7 +90,7 @@ HTML_WSGI = """\
         <div class="container">
             <div
             class="time"
-            data-on-load="@get('/updates-wsgi/')"
+            data-init="@get('/updates-wsgi/')"
             >
             Current time from element: <span id="currentTime">CURRENT_TIME</span>
             </div>

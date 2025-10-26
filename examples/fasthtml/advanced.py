@@ -46,7 +46,7 @@ app, rt = fast_app(
     hdrs=(
         Script(
             type="module",
-            src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js",
+            src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-RC.6/bundles/datastar.js",
         ),
     ),
 )
@@ -136,7 +136,7 @@ def index():
                 Label(fr="filter", data_attr_aria_busy="$filtering")("Filter Compound"),
                 # Bind the 'filter' signal to the value of this input, debouncing using Datastar modifier
                 Input(
-                    {"data-on-input__debounce.250ms": f"@post('{table}')"},
+                    {"data-on:input__debounce.250ms": f"@post('{table}')"},
                     data_bind_filter=True,
                     id="filter",
                     name="filter",
