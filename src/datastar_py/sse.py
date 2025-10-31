@@ -95,7 +95,7 @@ class ServerSentEventGenerator:
         if isinstance(elements, _HtmlProvider):
             elements = elements.__html__()
         data_lines = []
-        if mode and mode != "outer":  # TODO: Should there be a constant for this?
+        if mode and mode != consts.ElementPatchMode.OUTER:
             data_lines.append(f"{consts.MODE_DATALINE_LITERAL} {mode}")
         if selector:
             data_lines.append(f"{consts.SELECTOR_DATALINE_LITERAL} {selector}")
