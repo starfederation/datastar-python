@@ -85,6 +85,10 @@ headers of the SSE response yourself.
 
 A datastar response consists of 0..N datastar events. There are response
 classes included to make this easy in all of the supported frameworks.
+Each framework also exposes a `@datastar_response` decorator that will wrap
+return values (including generators) into the right response class while
+preserving sync handlers as sync so frameworks can keep them in their
+threadpools.
 
 The following examples will work across all supported frameworks when the
 response class is imported from the appropriate framework package.
