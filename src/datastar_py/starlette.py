@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
 from functools import wraps
+from inspect import isawaitable
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -53,17 +54,33 @@ P = ParamSpec("P")
 
 def datastar_response(
     func: Callable[P, Awaitable[DatastarEvents] | DatastarEvents],
-) -> Callable[P, Awaitable[DatastarResponse]]:
+) -> Callable[P, DatastarResponse]:
     """A decorator which wraps a function result in DatastarResponse.
 
     Can be used on a sync or async function or generator function.
     """
 
     @wraps(func)
-    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
         r = func(*args, **kwargs)
-        if isinstance(r, Awaitable):
-            return DatastarResponse(await r)
+
+        # Check for async generator/iterator first (most specific case)
+        if hasattr(r, "__aiter__"):
+            return DatastarResponse(r)
+
+        # Check for sync generator/iterator (before Awaitable to avoid false positives)
+        if hasattr(r, "__iter__") and not isinstance(r, (str, bytes)):
+            return DatastarResponse(r)
+
+        # Check for coroutines/tasks (but NOT async generators, already handled above)
+        if isawaitable(r):
+            # Wrap awaitable in an async generator that yields the result
+            async def await_and_yield():
+                yield await r
+
+            return DatastarResponse(await_and_yield())
+
+        # Default case: single value or unknown type
         return DatastarResponse(r)
 
     wrapper.__annotations__["return"] = DatastarResponse

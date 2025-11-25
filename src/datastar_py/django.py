@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
 from functools import wraps
+from inspect import isawaitable
 from typing import Any, ParamSpec
 
 from django.http import HttpRequest
@@ -54,7 +55,17 @@ def datastar_response(
     @wraps(func)
     async def wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
         r = func(*args, **kwargs)
-        if isinstance(r, Awaitable):
+
+        if hasattr(r, "__aiter__"):
+            raise NotImplementedError(
+                "Async generators/iterables are not yet supported by the Django adapter; "
+                "use a sync generator or return a single value/awaitable instead."
+            )
+
+        if hasattr(r, "__iter__") and not isinstance(r, (str, bytes)):
+            return DatastarResponse(r)
+
+        if isawaitable(r):
             return DatastarResponse(await r)
         return DatastarResponse(r)
 
