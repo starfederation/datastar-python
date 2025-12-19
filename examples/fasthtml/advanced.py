@@ -112,7 +112,7 @@ def index():
         Div(cls="container")(
             Section(
                 H2("Demonstration: Long-lived GET Request to Generator Function"),
-                Div(data_on_load=f"@get('{time}')", cls="time")(
+                Div(data_init=f"@get('{time}')", cls="time")(
                     "Current time from element: ",
                     Span(id="currentTime")(now),
                 ),
@@ -133,16 +133,18 @@ def index():
                     ),
                 ),
                 # When the below request is in flight, $filtering becomes true, setting the aria-busy attribute
-                Label(fr="filter", data_attr_aria_busy="$filtering")("Filter Compound"),
+                Label({"data-attr:aria-busy": "$filtering"}, fr="filter")("Filter Compound"),
                 # Bind the 'filter' signal to the value of this input, debouncing using Datastar modifier
                 Input(
-                    {"data-on:input__debounce.250ms": f"@post('{table}')"},
-                    data_bind_filter=True,
+                    {
+                        "data-on:input__debounce.250ms": f"@post('{table}')",
+                        "data-bind:filter": True,
+                        "data-indicator:filtering": True,
+                    },
                     id="filter",
                     name="filter",
-                    data_indicator_filtering=True,
                 ),
-                Div(id="gt-table", data_on_load=f"@post('{table}')"),
+                Div(id="gt-table", data_init=f"@post('{table}')"),
             ),
         ),
     )
@@ -175,11 +177,13 @@ async def hello():
 async def reset():
     reset_and_hello = Div(id="myElement")(
         Button(
-            data_on_click=f"@get('{hello}')",
+            {
+                "data-on:click": f"@get('{hello}')",
+                "data-indicator:resetting": True,
+                "data-attr:aria-busy": "$resetting",
+                "data-attr:disabled": "$resetting",
+            },
             type="reset",
-            data_indicator_resetting=True,
-            data_attr_aria_busy="$resetting",
-            data_attr_disabled="$resetting",
         )("Reset"),
         Div("Hello!"),
     )
@@ -194,10 +198,12 @@ async def reset():
 # Define the button once so that it can be used in the index response
 HELLO_BUTTON = Div(id="myElement")(
     Button(
-        data_on_click=f"@get('{reset}')",
-        data_indicator_loading=True,
-        data_attr_aria_busy="$loading",
-        data_attr_disabled="$loading",
+        {
+            "data-on:click": f"@get('{reset}')",
+            "data-indicator:loading": True,
+            "data-attr:aria-busy": "$loading",
+            "data-attr:disabled": "$loading",
+        }
     )("Say hello"),
 )
 

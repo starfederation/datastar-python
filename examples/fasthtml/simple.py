@@ -41,7 +41,7 @@ async def index():
         example_style,
         Body(data_signals=json.dumps({"currentTime": now}))(
             Div(cls="container")(
-                Div(data_on_load="@get('/updates')", cls="time")(
+                Div(data_init="@get('/updates')", cls="time")(
                     "Current time from element: ",
                     Span(id="currentTime")(now),
                 ),
