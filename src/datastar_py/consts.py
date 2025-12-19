@@ -38,6 +38,12 @@ class ElementPatchMode(StrEnum):
     AFTER = "after"
 
 
+class ElementPatchNamespace(StrEnum):
+    HTML = "html"
+    SVG = "svg"
+    MATHML = "mathml"
+
+
 # endregion ElementPatchMode
 
 
@@ -72,6 +78,7 @@ DEFAULT_SSE_RETRY_DURATION = 1000
 # region Dataline literals
 SELECTOR_DATALINE_LITERAL = "selector"
 MODE_DATALINE_LITERAL = "mode"
+NAMESPACE_DATALINE_LITERAL = "namespace"
 ELEMENTS_DATALINE_LITERAL = "elements"
 USE_VIEW_TRANSITION_DATALINE_LITERAL = "useViewTransition"
 SIGNALS_DATALINE_LITERAL = "signals"

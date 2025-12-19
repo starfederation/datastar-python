@@ -89,6 +89,7 @@ class ServerSentEventGenerator:
         selector: str | None = None,
         mode: consts.ElementPatchMode | None = None,
         use_view_transition: bool | None = None,
+        namespace: consts.ElementPatchNamespace | None = None,
         event_id: str | None = None,
         retry_duration: int | None = None,
     ) -> DatastarEvent:
@@ -106,6 +107,8 @@ class ServerSentEventGenerator:
             data_lines.append(
                 f"{consts.USE_VIEW_TRANSITION_DATALINE_LITERAL} {_js_bool(use_view_transition)}"
             )
+        if namespace and namespace != consts.ElementPatchNamespace.HTML:
+            data_lines.append(f"{consts.NAMESPACE_DATALINE_LITERAL} {namespace}")
 
         if elements:
             data_lines.extend(
