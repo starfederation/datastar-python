@@ -4,7 +4,7 @@ import json
 import re
 from collections.abc import Iterable, Iterator, Mapping
 from itertools import chain
-from typing import TYPE_CHECKING, Literal, TypeAlias, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias
 
 if TYPE_CHECKING:
     from typing import Self
@@ -100,15 +100,9 @@ JSEvent = Literal[
 ]
 
 
-SignalValue: TypeAlias = Union[
-    str,
-    int,
-    float,
-    bool,
-    dict[str, "SignalValue"],
-    list["SignalValue"],
-    None,
-]
+SignalValue: TypeAlias = (
+    str | int | float | bool | dict[str, "SignalValue"] | list["SignalValue"] | None
+)
 
 
 class AttributeGenerator:
@@ -622,6 +616,17 @@ class OnIntersectAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
     def full(self) -> Self:
         """Trigger the event listener when the full element is visible."""
         self._mods["full"] = []
+        return self
+
+    @property
+    def exit(self) -> Self:
+        """Trigger the event listener when the element exits the viewport."""
+        self._mods["exit"] = []
+        return self
+
+    def threshold(self, threshold: int) -> Self:
+        """Trigger the event listener when the element enters the viewport at the specified percentage."""
+        self._mods["threshold"] = [str(threshold)]
         return self
 
 
