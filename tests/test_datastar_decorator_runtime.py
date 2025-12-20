@@ -35,8 +35,8 @@ def anyio_backend() -> str:
         "async_generator",
     ],
 )
-def test_decorator_returns_response_objects(module_path: str, variant: str) -> None:
-    """Decorated handlers should stay sync-callable and return DatastarResponse immediately."""
+def test_decorator_preserves_sync_async_semantics(module_path: str, variant: str) -> None:
+    """Decorated handlers should preserve sync/async nature of the original function."""
 
     mod = importlib.import_module(module_path)
     datastar_response = mod.datastar_response
@@ -59,12 +59,18 @@ def test_decorator_returns_response_objects(module_path: str, variant: str) -> N
         async def handler() -> Any:
             yield SSE.patch_signals({"ok": True})
 
-    result = handler()
-    if inspect.iscoroutine(result):
-        result.close()  # avoid "coroutine was never awaited" warnings
+    is_async_variant = variant.startswith("async_")
 
-    assert not inspect.iscoroutinefunction(handler), "Decorator should preserve sync callable semantics"
-    assert isinstance(result, DatastarResponse)
+    # Verify the wrapper preserves sync/async nature
+    if is_async_variant:
+        assert inspect.iscoroutinefunction(handler), "Async handlers should remain async"
+        # Call and close coroutine to avoid warnings (we can't await in sync test)
+        coro = handler()
+        coro.close()
+    else:
+        assert not inspect.iscoroutinefunction(handler), "Sync handlers should remain sync"
+        result = handler()
+        assert isinstance(result, DatastarResponse), "Sync handlers should return DatastarResponse directly"
 
 
 async def _fetch(
@@ -125,3 +131,54 @@ async def test_sync_handler_runs_off_event_loop() -> None:
     finally:
         server.should_exit = True
         thread.join(timeout=2)
+
+
+def test_async_generator_iterates_on_event_loop() -> None:
+    """Async generators should iterate on the event loop, not spawn a thread.
+
+    This addresses the concern that a sync wrapper might cause async handlers
+    to run in the threadpool. The wrapper being sync only affects where the
+    generator object is created (trivial); iteration happens based on iterator
+    type - Starlette's StreamingResponse detects __aiter__ and iterates async.
+
+    This test uses Starlette, but the same principle applies to Litestar which
+    also uses a sync wrapper. Litestar's Stream response similarly detects
+    async iterators and iterates them on the event loop.
+    """
+    from starlette.testclient import TestClient
+
+    from datastar_py.starlette import datastar_response
+
+    execution_threads: dict[str, str] = {}
+
+    @datastar_response
+    async def async_gen_handler(request) -> Any:  # noqa: ANN001
+        execution_threads["async_gen"] = threading.current_thread().name
+        yield SSE.patch_signals({"async": True})
+
+    @datastar_response
+    def sync_gen_handler(request) -> Any:  # noqa: ANN001
+        execution_threads["sync_gen"] = threading.current_thread().name
+        yield SSE.patch_signals({"sync": True})
+
+    app = Starlette(routes=[
+        Route("/async", async_gen_handler),
+        Route("/sync", sync_gen_handler),
+    ])
+
+    with TestClient(app) as client:
+        client.get("/async")
+        client.get("/sync")
+
+    # Async generator runs on the asyncio portal thread (event loop context)
+    # Sync generator runs in a separate threadpool worker
+    # The key assertion: they run in DIFFERENT thread contexts
+    assert execution_threads["async_gen"] != execution_threads["sync_gen"], (
+        f"Async and sync generators should run in different thread contexts. "
+        f"Async ran on: {execution_threads['async_gen']}, Sync ran on: {execution_threads['sync_gen']}"
+    )
+
+    # Async generator should be on the event loop thread (asyncio-portal-* or MainThread)
+    assert "asyncio" in execution_threads["async_gen"] or execution_threads["async_gen"] == "MainThread", (
+        f"Async generator should run on event loop, but ran on {execution_threads['async_gen']}"
+    )

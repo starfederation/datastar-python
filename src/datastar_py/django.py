@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
-from functools import wraps
-from inspect import isawaitable
+from functools import partial, wraps
+from inspect import isasyncgenfunction, iscoroutinefunction
 from typing import Any, ParamSpec
 
 from django.http import HttpRequest
@@ -46,30 +46,44 @@ P = ParamSpec("P")
 
 def datastar_response(
     func: Callable[P, Awaitable[DatastarEvents] | DatastarEvents],
-) -> Callable[P, Awaitable[DatastarResponse]]:
+) -> Callable[P, Awaitable[DatastarResponse] | DatastarResponse]:
     """A decorator which wraps a function result in DatastarResponse.
 
     Can be used on a sync or async function or generator function.
+    Preserves the sync/async nature of the decorated function.
     """
+    # Unwrap partials to inspect the actual underlying function
+    actual_func = func
+    while isinstance(actual_func, partial):
+        actual_func = actual_func.func
 
-    @wraps(func)
-    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
-        r = func(*args, **kwargs)
+    # Async generators not supported by Django
+    if isasyncgenfunction(actual_func):
+        raise NotImplementedError(
+            "Async generators are not yet supported by the Django adapter; "
+            "use a sync generator or return a single value/awaitable instead."
+        )
 
-        if hasattr(r, "__aiter__"):
-            raise NotImplementedError(
-                "Async generators/iterables are not yet supported by the Django adapter; "
-                "use a sync generator or return a single value/awaitable instead."
-            )
+    # Coroutine (async def + return)
+    if iscoroutinefunction(actual_func):
 
-        if hasattr(r, "__iter__") and not isinstance(r, (str, bytes)):
-            return DatastarResponse(r)
+        @wraps(actual_func)
+        async def async_coro_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
+            result = await func(*args, **kwargs)
+            return DatastarResponse(result)
 
-        if isawaitable(r):
-            return DatastarResponse(await r)
-        return DatastarResponse(r)
+        async_coro_wrapper.__annotations__["return"] = DatastarResponse
+        return async_coro_wrapper
 
-    return wrapper
+    # Sync Function (def) - includes sync generators
+    else:
+
+        @wraps(actual_func)
+        def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
+            return DatastarResponse(func(*args, **kwargs))
+
+        sync_wrapper.__annotations__["return"] = DatastarResponse
+        return sync_wrapper
 
 
 def read_signals(request: HttpRequest) -> dict[str, Any] | None:
