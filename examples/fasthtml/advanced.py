@@ -22,6 +22,7 @@ from fasthtml.common import *
 from great_tables import GT
 from great_tables.data import reactions
 
+from datastar_py import attribute_generator as data
 from datastar_py.fasthtml import DatastarResponse, ServerSentEventGenerator
 
 ######################################################################################################
@@ -42,7 +43,7 @@ from datastar_py.fasthtml import DatastarResponse, ServerSentEventGenerator
 app, rt = fast_app(
     htmx=False,
     surreal=False,
-    live=True,
+    live=False,
     hdrs=(
         Script(
             type="module",
@@ -133,14 +134,12 @@ def index():
                     ),
                 ),
                 # When the below request is in flight, $filtering becomes true, setting the aria-busy attribute
-                Label({"data-attr:aria-busy": "$filtering"}, fr="filter")("Filter Compound"),
+                Label(data.attr({"aria-busy": "$filtering"}), fr="filter")("Filter Compound"),
                 # Bind the 'filter' signal to the value of this input, debouncing using Datastar modifier
                 Input(
-                    {
-                        "data-on:input__debounce.250ms": f"@post('{table}')",
-                        "data-bind:filter": True,
-                        "data-indicator:filtering": True,
-                    },
+                    data.on("input", f"@post('{table}')").debounce("250ms"),
+                    data.bind("filter"),
+                    data.indicator("filtering"),
                     id="filter",
                     name="filter",
                 ),
@@ -177,12 +176,11 @@ async def hello():
 async def reset():
     reset_and_hello = Div(id="myElement")(
         Button(
-            {
-                "data-on:click": f"@get('{hello}')",
-                "data-indicator:resetting": True,
-                "data-attr:aria-busy": "$resetting",
-                "data-attr:disabled": "$resetting",
-            },
+            # Attributes can either be defined using the Datastar SDK's
+            # attribute_generator or with dicts as in HELLO_BUTTON below
+            data.on("click", f"@get('{hello}')"),
+            data.indicator("resetting"),
+            data.attr({"aria-busy": "$resetting", "disabled": "$resetting"}),
             type="reset",
         )("Reset"),
         Div("Hello!"),
@@ -200,8 +198,8 @@ HELLO_BUTTON = Div(id="myElement")(
     Button(
         {
             "data-on:click": f"@get('{reset}')",
-            "data-indicator:loading": True,
-            "data-attr:aria-busy": "$loading",
+            "data-indicator": "loading",
+            "data-attr:aria-loading": "$loading",
             "data-attr:disabled": "$loading",
         }
     )("Say hello"),
