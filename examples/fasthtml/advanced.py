@@ -199,7 +199,7 @@ HELLO_BUTTON = Div(id="myElement")(
         {
             "data-on:click": f"@get('{reset}')",
             "data-indicator": "loading",
-            "data-attr:aria-loading": "$loading",
+            "data-attr:aria-busy": "$loading",
             "data-attr:disabled": "$loading",
         }
     )("Say hello"),
