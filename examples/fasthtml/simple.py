@@ -8,18 +8,18 @@
 # datastar-py = { path = "../../" }
 # ///
 import asyncio
-import json
 from datetime import datetime
 
 # ruff: noqa: F403, F405
 from fasthtml.common import *
 
+from datastar_py import attribute_generator as data
 from datastar_py.fasthtml import DatastarResponse, ServerSentEventGenerator, read_signals
 
 app, rt = fast_app(
     htmx=False,
     surreal=False,
-    live=True,
+    live=False,
     hdrs=(
         Script(
             type="module",
@@ -39,15 +39,15 @@ async def index():
     return Titled(
         "Datastar FastHTML example",
         example_style,
-        Body(data_signals=json.dumps({"currentTime": now}))(
+        Body(data.signals({"currentTime": now}))(
             Div(cls="container")(
-                Div(data_init="@get('/updates')", cls="time")(
+                Div(data.init("@get('/updates')"), cls="time")(
                     "Current time from element: ",
                     Span(id="currentTime")(now),
                 ),
                 Div(cls="time")(
                     "Current time from signal: ",
-                    Span(data_text="$currentTime")(now),
+                    Span(data.text("$currentTime"))(now),
                 ),
             ),
         ),
