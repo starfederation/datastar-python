@@ -13,7 +13,7 @@ from datetime import datetime
 
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 
 from datastar_py.fastapi import (
     DatastarResponse,
@@ -59,7 +59,7 @@ HTML = """\
 """
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def read_root():
     return HTMLResponse(HTML.replace("CURRENT_TIME", f"{datetime.isoformat(datetime.now())}"))
 
@@ -76,7 +76,7 @@ async def time_updates():
         await asyncio.sleep(1)
 
 
-@app.get("/updates")
+@app.get("/updates", response_class=StreamingResponse)
 async def updates(signals: ReadSignals):
     # ReadSignals is a dependency that automatically loads the signals from the request
     print(signals)
