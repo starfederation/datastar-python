@@ -136,14 +136,10 @@ async def test_sync_handler_runs_off_event_loop() -> None:
 def test_async_generator_iterates_on_event_loop() -> None:
     """Async generators should iterate on the event loop, not spawn a thread.
 
-    This addresses the concern that a sync wrapper might cause async handlers
-    to run in the threadpool. The wrapper being sync only affects where the
-    generator object is created (trivial); iteration happens based on iterator
-    type - Starlette's StreamingResponse detects __aiter__ and iterates async.
-
-    This test uses Starlette, but the same principle applies to Litestar which
-    also uses a sync wrapper. Litestar's Stream response similarly detects
-    async iterators and iterates them on the event loop.
+    The decorator preserves async nature: async generators get an async wrapper,
+    ensuring they run on the event loop. Sync generators get a sync wrapper,
+    running in the threadpool. This test verifies these execute in different
+    thread contexts as expected.
     """
     from starlette.testclient import TestClient
 

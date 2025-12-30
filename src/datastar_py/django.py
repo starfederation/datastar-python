@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
-from functools import partial, wraps
+from functools import wraps
 from inspect import isasyncgenfunction, iscoroutinefunction
 from typing import Any, ParamSpec
 
@@ -52,38 +52,27 @@ def datastar_response(
     Can be used on a sync or async function or generator function.
     Preserves the sync/async nature of the decorated function.
     """
-    # Unwrap partials to inspect the actual underlying function
-    actual_func = func
-    while isinstance(actual_func, partial):
-        actual_func = actual_func.func
-
-    # Async generators not supported by Django
-    if isasyncgenfunction(actual_func):
+    if isasyncgenfunction(func):
         raise NotImplementedError(
             "Async generators are not yet supported by the Django adapter; "
             "use a sync generator or return a single value/awaitable instead."
         )
 
-    # Coroutine (async def + return)
-    if iscoroutinefunction(actual_func):
+    if iscoroutinefunction(func):
 
-        @wraps(actual_func)
-        async def async_coro_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
-            result = await func(*args, **kwargs)
-            return DatastarResponse(result)
+        @wraps(func)
+        async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
+            return DatastarResponse(await func(*args, **kwargs))
 
-        async_coro_wrapper.__annotations__["return"] = DatastarResponse
-        return async_coro_wrapper
+        async_wrapper.__annotations__["return"] = DatastarResponse
+        return async_wrapper
 
-    # Sync Function (def) - includes sync generators
-    else:
+    @wraps(func)
+    def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
+        return DatastarResponse(func(*args, **kwargs))
 
-        @wraps(actual_func)
-        def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
-            return DatastarResponse(func(*args, **kwargs))
-
-        sync_wrapper.__annotations__["return"] = DatastarResponse
-        return sync_wrapper
+    sync_wrapper.__annotations__["return"] = DatastarResponse
+    return sync_wrapper
 
 
 def read_signals(request: HttpRequest) -> dict[str, Any] | None:
