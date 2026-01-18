@@ -45,7 +45,7 @@ def index():
             <head>
                 <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-RC.7/bundles/datastar.js"></script>
             </head>
-            <body {data.on_load("@get('/updates')")}>
+            <body {data.init("@get('/updates')")}>
                 <span id="currentTime"></span><br>
                 <span data-text="$currentTime"></span>
             </body>
