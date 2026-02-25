@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from collections.abc import AsyncIterable, Iterable, Mapping
 from itertools import chain
-from typing import Literal, Protocol, TypeAlias, Union, overload, runtime_checkable
+from typing import Literal, Protocol, TypeAlias, overload, runtime_checkable
 
 import datastar_py.consts as consts
 from datastar_py.attributes import _escape
@@ -32,9 +32,9 @@ class DatastarEvent(str):
 
 
 # 0..N datastar events
-DatastarEvents: TypeAlias = Union[
-    DatastarEvent, Iterable[DatastarEvent], AsyncIterable[DatastarEvent], None
-]
+DatastarEvents: TypeAlias = (
+    DatastarEvent | Iterable[DatastarEvent] | AsyncIterable[DatastarEvent] | None
+)
 
 
 class ServerSentEventGenerator:

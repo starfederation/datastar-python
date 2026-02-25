@@ -1,6 +1,5 @@
 [build-system]
 build-backend = "hatchling.build"
-
 requires = [ "hatchling" ]
 
 [project]
@@ -39,9 +38,9 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
-
-dependencies = [  ]
+dependencies = []
 urls.Documentation = "https://github.com/starfederation/datastar-python/blob/develop/README.md"
 urls.GitHub = "https://github.com/starfederation/datastar-python"
 
