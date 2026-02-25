@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from functools import wraps
 from inspect import isasyncgen, isasyncgenfunction, isgenerator
-from typing import Any, Callable, ParamSpec
+from typing import Any, ParamSpec
 
 from quart import Response, copy_current_request_context, request, stream_with_context
 

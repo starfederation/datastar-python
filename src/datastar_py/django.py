@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from functools import wraps
-from typing import Any, Callable, ParamSpec
+from typing import Any, ParamSpec
 
 from django.http import HttpRequest
 from django.http import StreamingHttpResponse as _StreamingHttpResponse

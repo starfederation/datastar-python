@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Collection, Mapping
+from collections.abc import Awaitable, Callable, Collection, Mapping
 from contextlib import aclosing, closing
 from functools import wraps
 from inspect import isasyncgen, isgenerator
-from typing import Any, Callable, ParamSpec, Union
+from typing import Any, ParamSpec
 
 from sanic import HTTPResponse, Request
 
@@ -92,7 +92,7 @@ def datastar_response(
             return None
         return DatastarResponse(r)
 
-    wrapper.__annotations__["return"] = Union[DatastarResponse, None]
+    wrapper.__annotations__["return"] = DatastarResponse | None
     return wrapper
 
 
