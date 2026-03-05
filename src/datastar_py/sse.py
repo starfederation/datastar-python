@@ -5,7 +5,7 @@ from collections.abc import AsyncIterable, Iterable, Mapping
 from itertools import chain
 from typing import Literal, Protocol, TypeAlias, overload, runtime_checkable
 
-import datastar_py.consts as consts
+from datastar_py import consts
 from datastar_py.attributes import _escape
 
 SSE_HEADERS: dict[str, str] = {
@@ -28,7 +28,7 @@ class _HtmlProvider(Protocol):
 
 
 class DatastarEvent(str):
-    pass
+    __slots__ = ()
 
 
 # 0..N datastar events
@@ -83,7 +83,7 @@ class ServerSentEventGenerator:
         retry_duration: int | None = None,
     ) -> DatastarEvent: ...
     @classmethod
-    def patch_elements(
+    def patch_elements(  # noqa: PLR0913 too many arguments
         cls,
         elements: str | _HtmlProvider | None = None,
         selector: str | None = None,
