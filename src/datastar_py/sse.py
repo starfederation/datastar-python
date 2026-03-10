@@ -136,7 +136,7 @@ class ServerSentEventGenerator:
     @classmethod
     def patch_signals(
         cls,
-        signals: dict[str, str] | str,
+        signals: dict[str, str | int | float | None] | str,
         event_id: str | None = None,
         only_if_missing: bool | None = None,
         retry_duration: int | None = None,
