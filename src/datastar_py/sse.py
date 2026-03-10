@@ -6,7 +6,7 @@ from itertools import chain
 from typing import Literal, Protocol, TypeAlias, overload, runtime_checkable
 
 import datastar_py.consts as consts
-from datastar_py.attributes import _escape
+from datastar_py.attributes import _escape, SignalValue
 
 SSE_HEADERS: dict[str, str] = {
     "Cache-Control": "no-cache",
@@ -136,7 +136,7 @@ class ServerSentEventGenerator:
     @classmethod
     def patch_signals(
         cls,
-        signals: dict[str, str | int | float | bool | None] | str,
+        signals: dict[str, SignalValue] | str,
         event_id: str | None = None,
         only_if_missing: bool | None = None,
         retry_duration: int | None = None,
