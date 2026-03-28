@@ -8,6 +8,13 @@ from typing import Any, ParamSpec
 
 from sanic import HTTPResponse, Request
 
+try:
+    import brotli
+
+    BROTLI_AVAILABLE = True
+except ImportError:
+    BROTLI_AVAILABLE = False
+
 from . import _read_signals
 from .sse import SSE_HEADERS, DatastarEvent, DatastarEvents, ServerSentEventGenerator
 
@@ -28,7 +35,10 @@ class DatastarResponse(HTTPResponse):
         content: DatastarEvent | Collection[DatastarEvent] | None = None,
         status: int | None = None,
         headers: Mapping[str, str] | None = None,
+        brotli: bool = False,
     ) -> None:
+        self._brotli = brotli
+        self._brotli_compressor = None
         if not content:
             status = status or 204
         elif not isinstance(content, str):
@@ -47,13 +57,37 @@ class DatastarResponse(HTTPResponse):
             # When the response is created with no content, it's set to a 204 by default
             # if we end up streaming to it, change the status code to 200 before sending.
             self.status = 200
-        await super().send(event, end_stream=end_stream)
+        if not event and end_stream is None:
+            end_stream = True
+        data = event.encode("utf-8") if event else b""
+        if self._brotli:
+            if not BROTLI_AVAILABLE:
+                raise ImportError("brotli is not installed")
+            if self._brotli_compressor is None and event:
+                self._brotli_compressor = brotli.Compressor(
+                    mode=brotli.MODE_TEXT
+                )  # TODO: compression/window settings
+                self.headers["Content-Encoding"] = "br"
+            if data:
+                data = self._brotli_compressor.process(data)
+                data += self._brotli_compressor.flush()
+            if end_stream and self._brotli_compressor:
+                data += self._brotli_compressor.finish()
+        await super().send(data, end_stream=end_stream)
 
 
 async def datastar_respond(
-    request: Request, *, status: int = 200, headers: Mapping[str, str] | None = None
+    request: Request,
+    *,
+    status: int = 200,
+    headers: Mapping[str, str] | None = None,
+    brotli: bool = False,
 ) -> DatastarResponse:
-    return await request.respond(DatastarResponse(status=status, headers=headers))
+    return await request.respond(
+        DatastarResponse(
+            status=status, headers=headers, brotli=brotli and _client_accepts_brotli(request)
+        )
+    )
 
 
 P = ParamSpec("P")
@@ -98,3 +132,9 @@ def datastar_response(
 
 async def read_signals(request: Request) -> dict[str, Any] | None:
     return _read_signals(request.method, request.headers, request.args, request.body)
+
+
+def _client_accepts_brotli(request: Request) -> bool:
+    """Return True if the client's Accept-Encoding includes brotli."""
+    accept_encoding = request.headers.get("Accept-Encoding", "")
+    return any(part.split(";")[0].strip() == "br" for part in accept_encoding.split(","))
