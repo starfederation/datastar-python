@@ -35,10 +35,15 @@ class DatastarResponse(HTTPResponse):
         content: DatastarEvent | Collection[DatastarEvent] | None = None,
         status: int | None = None,
         headers: Mapping[str, str] | None = None,
-        brotli: bool = False,
+        compression: bool = False,
+        brotli_quality: int | None = None,
+        brotli_lgwin: int | None = None,
     ) -> None:
-        self._brotli = brotli
+        self._compression = compression
         self._brotli_compressor = None
+        self._brotli_quality = brotli_quality if brotli_quality is not None else 11
+        self._brotli_lgwin = brotli_lgwin if brotli_lgwin is not None else 22
+
         if not content:
             status = status or 204
         elif not isinstance(content, str):
@@ -60,13 +65,15 @@ class DatastarResponse(HTTPResponse):
         if not event and end_stream is None:
             end_stream = True
         data = event.encode("utf-8") if event else b""
-        if self._brotli:
+        if self._compression:
             if not BROTLI_AVAILABLE:
                 raise ImportError("brotli is not installed")
-            if self._brotli_compressor is None and event:
+            if self._brotli_compressor is None and data:
                 self._brotli_compressor = brotli.Compressor(
-                    mode=brotli.MODE_TEXT
-                )  # TODO: compression/window settings
+                    mode=brotli.MODE_TEXT,
+                    quality=self._brotli_quality,
+                    lgwin=self._brotli_lgwin,
+                )
                 self.headers["Content-Encoding"] = "br"
             if data:
                 data = self._brotli_compressor.process(data)
@@ -81,11 +88,17 @@ async def datastar_respond(
     *,
     status: int = 200,
     headers: Mapping[str, str] | None = None,
-    brotli: bool = False,
+    compression: bool = False,
+    brotli_quality: int | None = None,
+    brotli_lgwin: int | None = None,
 ) -> DatastarResponse:
     return await request.respond(
         DatastarResponse(
-            status=status, headers=headers, brotli=brotli and _client_accepts_brotli(request)
+            status=status,
+            headers=headers,
+            compression=compression and _client_accepts_brotli(request),
+            brotli_quality=brotli_quality,
+            brotli_lgwin=brotli_lgwin,
         )
     )
 
