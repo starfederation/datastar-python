@@ -59,23 +59,20 @@ dev = [
 [tool.ruff]
 line-length = 99
 lint.select = [
-  # Annotations
-  "ANN",
-  # flake8-bugbear
-  "B",
-  "D",
-  # pycodestyle
-  "E",
-  # Pyflakes
-  "F",
-  # isort
-  "I",
-  # Ruff specific
-  "RUF",
-  # flake8-simplify
-  "SIM",
-  # pyupgrade
-  "UP",
+  "ANN",  # annotations
+  "B",    # flake8-bugbear
+  "D",    # pydocstyle
+  "DTZ",  # flake8-datetimez
+  "E",    # pycodestyle
+  "F",    # Pyflakes
+  "FURB", # refurb
+  "I",    # isort
+  "PL",   # Pylint
+  "PYI",  # flake8-pyi
+  "RUF",  # Ruff-specific rules
+  "SIM",  # flake8-simplify
+  "SLOT", # flake8-slots
+  "UP",   # pyupgrade
 ]
 lint.ignore = [
   "D100", # undocumented-public-module
@@ -90,5 +87,6 @@ lint.ignore = [
   "D415", # Duplicate of D400
   "E501",
 ]
-lint.per-file-ignores."examples/**/*.py" = [ "ANN" ]
+lint.per-file-ignores."examples/**/*.py" = [ "ANN", "DTZ005", "PLC0415" ]
 lint.fixable = [ "ALL" ]
+lint.pylint.allow-magic-value-types = [ "int", "str" ]
