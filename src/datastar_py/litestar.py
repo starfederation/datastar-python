@@ -46,6 +46,7 @@ class DatastarResponse(Stream):
             status_code = status_code or 204
             content = tuple()
         else:
+            status_code = status_code or 200
             headers = {**self.default_headers, **(headers or {})}
         if isinstance(content, DatastarEvent):
             content = (content,)

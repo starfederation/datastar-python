@@ -127,13 +127,13 @@ class AttributeGenerator:
         :param expressions_: If True, the values of the signals will be evaluated as expressions
             rather than literals.
         """
-        signals = {**(signals_dict if signals_dict else {}), **signals}
+        signals = {**(signals_dict or {}), **signals}
         val = _js_object(signals) if expressions_ else json.dumps(signals)
         return SignalsAttr(value=val, alias=self._alias)
 
     def computed(self, computed_dict: Mapping | None = None, /, **computed: str) -> BaseAttr:
         """Create signals that are computed based on an expression."""
-        computed = {**(computed_dict if computed_dict else {}), **computed}
+        computed = {**(computed_dict or {}), **computed}
         first, *rest = (
             BaseAttr("computed", key=sig, value=expr, alias=self._alias)
             for sig, expr in computed.items()
@@ -152,16 +152,16 @@ class AttributeGenerator:
 
     def attr(self, attr_dict: Mapping | None = None, /, **attrs: str) -> BaseAttr:
         """Set the value of any HTML attributes to expressions, and keep them in sync."""
-        attrs = {**(attr_dict if attr_dict else {}), **attrs}
+        attrs = {**(attr_dict or {}), **attrs}
         return BaseAttr("attr", value=_js_object(attrs), alias=self._alias)
 
     def bind(self, signal_name: str) -> BaseAttr:
         """Set up two-way data binding between a signal and an element's value."""
-        return BaseAttr("bind", value=signal_name, alias=self._alias)
+        return BindAttr(value=signal_name, alias=self._alias)
 
     def class_(self, class_dict: Mapping | None = None, /, **classes: str) -> BaseAttr:
         """Add or removes classes to or from an element based on expressions."""
-        classes = {**(class_dict if class_dict else {}), **classes}
+        classes = {**(class_dict or {}), **classes}
         return BaseAttr("class", value=_js_object(classes), alias=self._alias)
 
     def init(self, expression: str) -> InitAttr:
@@ -216,7 +216,7 @@ class AttributeGenerator:
 
     def style(self, style_dict: Mapping | None = None, /, **styles: str) -> BaseAttr:
         """Set the value of inline CSS styles on an element based on an expression, and keeps them in sync."""
-        styles = {**(style_dict if style_dict else {}), **styles}
+        styles = {**(style_dict or {}), **styles}
         return BaseAttr("style", value=_js_object(styles), alias=self._alias)
 
     def text(self, expression: str) -> BaseAttr:
@@ -432,6 +432,21 @@ class IgnoreAttr(BaseAttr):
         return self
 
 
+class BindAttr(BaseAttr):
+    _attr = "bind"
+
+    def prop(self, prop: str) -> Self:
+        """Bind to a specified property."""
+        self._mods["prop"] = [prop]
+        return self
+
+    def event(self, event: str | Iterable[str]) -> Self:
+        """Only update the signal when the specified events are fired."""
+        events = [event] if isinstance(event, str) else list(event)
+        self._mods["event"] = events
+        return self
+
+
 class OnAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
     _attr = "on"
 
@@ -457,6 +472,12 @@ class OnAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
     def window(self) -> Self:
         """Attach the event listener to the window element."""
         self._mods["window"] = []
+        return self
+
+    @property
+    def document(self) -> Self:
+        """Attach the event listener to the document element."""
+        self._mods["document"] = []
         return self
 
     @property
@@ -633,7 +654,7 @@ class OnIntersectAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
 class OnIntervalAttr(BaseAttr, ViewtransitionMod):
     _attr = "on-interval"
 
-    def duration(self, duration: int | float | str, *, leading: bool = False) -> Self:
+    def duration(self, duration: float | str, *, leading: bool = False) -> Self:
         """Set the interval duration."""
         self._mods["duration"] = [str(duration)]
         if leading:
