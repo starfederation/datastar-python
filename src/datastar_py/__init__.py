@@ -15,7 +15,7 @@ def _read_signals(
 ) -> dict[str, Any] | None:
     if "Datastar-Request" not in headers:
         return None
-    if method == "GET":
+    if method in ("GET", "DELETE"):
         data = params.get("datastar")
     elif headers.get("Content-Type") == "application/json":
         data = body
