@@ -157,7 +157,7 @@ class AttributeGenerator:
 
     def bind(self, signal_name: str) -> BaseAttr:
         """Set up two-way data binding between a signal and an element's value."""
-        return BaseAttr("bind", value=signal_name, alias=self._alias)
+        return BindAttr(value=signal_name, alias=self._alias)
 
     def class_(self, class_dict: Mapping | None = None, /, **classes: str) -> BaseAttr:
         """Add or removes classes to or from an element based on expressions."""
@@ -432,6 +432,21 @@ class IgnoreAttr(BaseAttr):
         return self
 
 
+class BindAttr(BaseAttr):
+    _attr = "bind"
+
+    def prop(self, prop: str) -> Self:
+        """Bind to a specified property."""
+        self._mods["prop"] = [prop]
+        return self
+
+    def event(self, event: str | Iterable[str]) -> Self:
+        """Only update the signal when the specified events are fired."""
+        events = [event] if isinstance(event, str) else list(event)
+        self._mods["event"] = events
+        return self
+
+
 class OnAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
     _attr = "on"
 
@@ -457,6 +472,12 @@ class OnAttr(BaseAttr, TimingMod, DelayMod, ViewtransitionMod):
     def window(self) -> Self:
         """Attach the event listener to the window element."""
         self._mods["window"] = []
+        return self
+
+    @property
+    def document(self) -> Self:
+        """Attach the event listener to the document element."""
+        self._mods["document"] = []
         return self
 
     @property
