@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: "0.7.21"
 
       - name: "Set up Python"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
@@ -27,14 +27,14 @@ jobs:
         run: uv run sdk-test.py &
 
       - name: Checkout datastar repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: starfederation/datastar
           ref: develop
           path: datastar
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '1.22'
           cache-dependency-path: datastar/sdk/tests
