@@ -71,8 +71,6 @@ async def test_datastar_response_matrix(
 
         if not settings.configured:
             settings.configure(DEFAULT_CHARSET="utf-8")
-        if variant == "async_generator":
-            pytest.skip("Django adapter does not support async generators yet")
 
     mod = _require_module(module_path)
     datastar_response = mod.datastar_response

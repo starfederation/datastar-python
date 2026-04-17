@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
 from functools import wraps
-from inspect import isasyncgenfunction, iscoroutinefunction
+from inspect import isasyncgenfunction, isawaitable, iscoroutinefunction
 from typing import Any, ParamSpec
 
 from django.http import HttpRequest
@@ -52,17 +52,14 @@ def datastar_response(
     Can be used on a sync or async function or generator function.
     Preserves the sync/async nature of the decorated function.
     """
-    if isasyncgenfunction(func):
-        raise NotImplementedError(
-            "Async generators are not yet supported by the Django adapter; "
-            "use a sync generator or return a single value/awaitable instead."
-        )
-
-    if iscoroutinefunction(func):
+    if iscoroutinefunction(func) or isasyncgenfunction(func):
 
         @wraps(func)
         async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
-            return DatastarResponse(await func(*args, **kwargs))
+            result = func(*args, **kwargs)
+            if isawaitable(result):
+                result = await result
+            return DatastarResponse(result)
 
         async_wrapper.__annotations__["return"] = DatastarResponse
         return async_wrapper

@@ -5,7 +5,7 @@ from functools import wraps
 from inspect import isasyncgen, isasyncgenfunction, iscoroutinefunction, isgenerator
 from typing import Any, ParamSpec
 
-from quart import Response, request, stream_with_context
+from quart import Response, copy_current_request_context, request, stream_with_context
 
 from . import _read_signals
 from .sse import SSE_HEADERS, DatastarEvents, ServerSentEventGenerator
@@ -63,7 +63,7 @@ def datastar_response(
 
         @wraps(func)
         async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
-            return DatastarResponse(await func(*args, **kwargs))
+            return DatastarResponse(await copy_current_request_context(func)(*args, **kwargs))
 
         async_wrapper.__annotations__["return"] = DatastarResponse
         return async_wrapper
