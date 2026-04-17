@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable, Collection, Mapping
 from contextlib import aclosing, closing
 from functools import wraps
-from inspect import isasyncgen, isgenerator
+from inspect import isasyncgen, isawaitable, isgenerator
 from typing import Any, ParamSpec
 
 from sanic import HTTPResponse, Request
@@ -70,7 +70,7 @@ def datastar_response(
     @wraps(func)
     async def wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse | None:
         r = func(*args, **kwargs)
-        if isinstance(r, Awaitable):
+        if isawaitable(r):
             return DatastarResponse(await r)
         if isasyncgen(r):
             request = args[0]

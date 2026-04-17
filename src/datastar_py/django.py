@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
 from functools import wraps
+from inspect import isasyncgenfunction, isawaitable, iscoroutinefunction
 from typing import Any, ParamSpec
 
 from django.http import HttpRequest
@@ -45,20 +46,30 @@ P = ParamSpec("P")
 
 def datastar_response(
     func: Callable[P, Awaitable[DatastarEvents] | DatastarEvents],
-) -> Callable[P, Awaitable[DatastarResponse]]:
+) -> Callable[P, Awaitable[DatastarResponse] | DatastarResponse]:
     """A decorator which wraps a function result in DatastarResponse.
 
     Can be used on a sync or async function or generator function.
+    Preserves the sync/async nature of the decorated function.
     """
+    if iscoroutinefunction(func) or isasyncgenfunction(func):
+
+        @wraps(func)
+        async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
+            result = func(*args, **kwargs)
+            if isawaitable(result):
+                result = await result
+            return DatastarResponse(result)
+
+        async_wrapper.__annotations__["return"] = DatastarResponse
+        return async_wrapper
 
     @wraps(func)
-    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
-        r = func(*args, **kwargs)
-        if isinstance(r, Awaitable):
-            return DatastarResponse(await r)
-        return DatastarResponse(r)
+    def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> DatastarResponse:
+        return DatastarResponse(func(*args, **kwargs))
 
-    return wrapper
+    sync_wrapper.__annotations__["return"] = DatastarResponse
+    return sync_wrapper
 
 
 def read_signals(request: HttpRequest) -> dict[str, Any] | None:
