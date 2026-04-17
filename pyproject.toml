@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "datastar-py"
-version = "0.8.0"
+version = "1.0.0"
 description = "Helper functions and classes for the Datastar library (https://data-star.dev/)"
 readme = "README.md"
 keywords = [
