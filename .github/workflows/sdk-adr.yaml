@@ -2,9 +2,9 @@ name: SDK Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test:
@@ -36,7 +36,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.22'
+          go-version: "1.23"
           cache-dependency-path: datastar/sdk/tests
 
       - name: Run SDK tests against test server
