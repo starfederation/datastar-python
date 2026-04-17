@@ -90,5 +90,6 @@ lint.ignore = [
   "E501",
 ]
 lint.per-file-ignores."examples/**/*.py" = [ "ANN", "DTZ005", "PLC0415" ]
+lint.per-file-ignores."tests/**/*.py" = [ "ANN", "PLC0415", "PLR2004" ]
 lint.fixable = [ "ALL" ]
 lint.pylint.allow-magic-value-types = [ "int", "str" ]

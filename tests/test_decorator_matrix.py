@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import importlib
 import inspect
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import pytest
 
 from datastar_py.sse import ServerSentEventGenerator as SSE
-
 
 FRAMEWORKS = [
     # name, module path, iterator attribute on response (None means use response directly)
@@ -63,7 +63,6 @@ async def test_datastar_response_matrix(
     framework_name: str, module_path: str, iterator_attr: str | None, variant: str
 ) -> None:
     """Ensure decorator works for sync/async and generator/non-generator functions."""
-
     if framework_name in {"quart", "sanic"}:
         pytest.skip(f"{framework_name} decorator requires full request context to exercise")
     if framework_name == "django":
@@ -77,18 +76,22 @@ async def test_datastar_response_matrix(
     DatastarResponse = mod.DatastarResponse
 
     if variant == "sync_value":
+
         @datastar_response
         def handler() -> Any:
             return SSE.patch_signals({"ok": True})
     elif variant == "sync_generator":
+
         @datastar_response
         def handler() -> Any:
             yield SSE.patch_signals({"ok": True})
     elif variant == "async_value":
+
         @datastar_response
         async def handler() -> Any:
             return SSE.patch_signals({"ok": True})
     else:
+
         @datastar_response
         async def handler() -> Any:
             yield SSE.patch_signals({"ok": True})

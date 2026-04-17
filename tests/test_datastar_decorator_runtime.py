@@ -35,18 +35,17 @@ async def _fetch(
 @pytest.mark.anyio("asyncio")
 async def test_sync_handler_runs_off_event_loop() -> None:
     """Sync routes should stay in the threadpool; otherwise they block the event loop."""
-
     entered = threading.Event()
 
     from datastar_py.starlette import datastar_response
 
     @datastar_response
-    def slow(request) -> Any:  # noqa: ANN001
+    def slow(request) -> Any:
         entered.set()
         time.sleep(1.0)  # if run on the event loop, this blocks other requests
         return SSE.patch_signals({"slow": True})
 
-    async def ping(request) -> PlainTextResponse:  # noqa: ANN001
+    async def ping(request) -> PlainTextResponse:
         return PlainTextResponse("pong")
 
     app = Starlette(routes=[Route("/slow", slow), Route("/ping", ping)])

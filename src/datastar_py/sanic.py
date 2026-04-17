@@ -4,7 +4,7 @@ from collections.abc import Awaitable, Callable, Collection, Mapping
 from contextlib import aclosing, closing
 from functools import wraps
 from inspect import isasyncgen, isawaitable, isgenerator
-from typing import Any, ParamSpec, Union
+from typing import Any, ParamSpec
 
 from sanic import HTTPResponse, Request
 
