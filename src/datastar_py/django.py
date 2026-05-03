@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
 from inspect import isasyncgenfunction, isawaitable, iscoroutinefunction
-from typing import Any, ParamSpec
+from typing import Any, ParamSpec, overload
 
 from django.http import HttpRequest
 from django.http import StreamingHttpResponse as _StreamingHttpResponse
@@ -42,6 +42,18 @@ class DatastarResponse(_StreamingHttpResponse):
 
 
 P = ParamSpec("P")
+
+
+@overload
+def datastar_response(
+    func: Callable[P, Coroutine[Any, Any, DatastarEvents]],
+) -> Callable[P, Coroutine[Any, Any, DatastarResponse]]: ...
+
+
+@overload
+def datastar_response(
+    func: Callable[P, DatastarEvents],
+) -> Callable[P, DatastarResponse]: ...
 
 
 def datastar_response(
