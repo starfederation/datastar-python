@@ -9,14 +9,15 @@
 # ///
 
 import asyncio
+from collections.abc import AsyncIterator
 from datetime import datetime
 
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse
+from fastapi.sse import EventSourceResponse, ServerSentEvent
 
 from datastar_py.fastapi import (
-    DatastarResponse,
     ReadSignals,
     ServerSentEventGenerator,
 )
@@ -64,7 +65,10 @@ async def read_root():
     return HTMLResponse(HTML.replace("CURRENT_TIME", f"{datetime.isoformat(datetime.now())}"))
 
 
-async def time_updates():
+@app.get("/updates", response_class=EventSourceResponse)
+async def updates(signals: ReadSignals) -> AsyncIterator[ServerSentEvent]:
+    # ReadSignals is a dependency that automatically loads the signals from the request
+    print(signals)
     while True:
         yield ServerSentEventGenerator.patch_elements(
             f"""<span id="currentTime">{datetime.now().isoformat()}"""
@@ -74,13 +78,6 @@ async def time_updates():
             {"currentTime": f"{datetime.now().isoformat()}"}
         )
         await asyncio.sleep(1)
-
-
-@app.get("/updates", response_class=StreamingResponse)
-async def updates(signals: ReadSignals):
-    # ReadSignals is a dependency that automatically loads the signals from the request
-    print(signals)
-    return DatastarResponse(time_updates())
 
 
 if __name__ == "__main__":

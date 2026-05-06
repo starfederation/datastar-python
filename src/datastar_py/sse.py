@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from collections.abc import AsyncIterable, Iterable, Mapping
 from itertools import chain
-from typing import Literal, Protocol, TypeAlias, overload, runtime_checkable
+from typing import Any, Literal, Protocol, TypeAlias, overload, runtime_checkable
 
 from datastar_py import consts
 from datastar_py.attributes import SignalValue, _escape
@@ -37,7 +37,130 @@ DatastarEvents: TypeAlias = (
 )
 
 
-class ServerSentEventGenerator:
+class BaseServerSentEventGenerator:
+    __slots__ = ()
+
+    @classmethod
+    def _patch_elements(  # noqa: PLR0913 too many arguments
+        cls,
+        elements: str | _HtmlProvider | None = None,
+        selector: str | None = None,
+        mode: consts.ElementPatchMode | None = None,
+        use_view_transition: bool | None = None,
+        namespace: consts.ElementPatchNamespace | None = None,
+        event_id: str | None = None,
+        retry_duration: int | None = None,
+    ) -> dict[str, Any]:
+        if isinstance(elements, _HtmlProvider):
+            elements = elements.__html__()
+        data_lines = []
+        if mode and mode != consts.ElementPatchMode.OUTER:
+            data_lines.append(f"{consts.MODE_DATALINE_LITERAL} {mode}")
+        if selector:
+            data_lines.append(f"{consts.SELECTOR_DATALINE_LITERAL} {selector}")
+        if (
+            use_view_transition is not None
+            and use_view_transition != consts.DEFAULT_ELEMENTS_USE_VIEW_TRANSITIONS
+        ):
+            data_lines.append(
+                f"{consts.USE_VIEW_TRANSITION_DATALINE_LITERAL} {_js_bool(use_view_transition)}"
+            )
+        if namespace and namespace != consts.ElementPatchNamespace.HTML:
+            data_lines.append(f"{consts.NAMESPACE_DATALINE_LITERAL} {namespace}")
+
+        if elements:
+            data_lines.extend(
+                f"{consts.ELEMENTS_DATALINE_LITERAL} {x}" for x in elements.splitlines()
+            )
+
+        return {
+            "event_type": consts.EventType.PATCH_ELEMENTS,
+            "data_lines": data_lines,
+            "event_id": event_id,
+            "retry_duration": retry_duration,
+        }
+
+    @classmethod
+    def _remove_elements(
+        cls, selector: str, event_id: str | None = None, retry_duration: int | None = None
+    ) -> dict[str, Any]:
+        return cls._patch_elements(
+            selector=selector,
+            mode=consts.ElementPatchMode.REMOVE,
+            event_id=event_id,
+            retry_duration=retry_duration,
+        )
+
+    @classmethod
+    def _patch_signals(
+        cls,
+        signals: dict[str, SignalValue] | str,
+        event_id: str | None = None,
+        only_if_missing: bool | None = None,
+        retry_duration: int | None = None,
+    ) -> dict[str, Any]:
+        data_lines = []
+        if (
+            only_if_missing is not None
+            and only_if_missing != consts.DEFAULT_PATCH_SIGNALS_ONLY_IF_MISSING
+        ):
+            data_lines.append(
+                f"{consts.ONLY_IF_MISSING_DATALINE_LITERAL} {_js_bool(only_if_missing)}"
+            )
+
+        signals_str = (
+            signals if isinstance(signals, str) else json.dumps(signals, separators=(",", ":"))
+        )
+        data_lines.extend(
+            f"{consts.SIGNALS_DATALINE_LITERAL} {line}" for line in signals_str.splitlines()
+        )
+
+        return {
+            "event_type": consts.EventType.PATCH_SIGNALS,
+            "data_lines": data_lines,
+            "event_id": event_id,
+            "retry_duration": retry_duration,
+        }
+
+    @classmethod
+    def _execute_script(
+        cls,
+        script: str,
+        auto_remove: bool = True,
+        attributes: Mapping[str, str] | list[str] | None = None,
+        event_id: str | None = None,
+        retry_duration: int | None = None,
+    ) -> dict[str]:
+        attribute_string = ""
+        if auto_remove:
+            attribute_string += ' data-effect="el.remove()"'
+        if attributes:
+            if isinstance(attributes, Mapping):
+                attribute_string += " " + " ".join(
+                    f'{_escape(k)}="{_escape(v)}"' for k, v in attributes.items()
+                )
+            else:
+                attribute_string += " " + " ".join(attributes)
+        script_tag = f"<script{attribute_string}>{script}</script>"
+
+        return cls._patch_elements(
+            script_tag,
+            mode=consts.ElementPatchMode.APPEND,
+            selector="body",
+            event_id=event_id,
+            retry_duration=retry_duration,
+        )
+
+    @classmethod
+    def _redirect(cls, location: str) -> dict[str, Any]:
+        return cls._execute_script(f"setTimeout(() => window.location = '{location}')")
+
+
+def _js_bool(b: bool) -> str:
+    return "true" if b else "false"
+
+
+class ServerSentEventGenerator(BaseServerSentEventGenerator):
     __slots__ = ()
 
     @classmethod
@@ -93,44 +216,29 @@ class ServerSentEventGenerator:
         event_id: str | None = None,
         retry_duration: int | None = None,
     ) -> DatastarEvent:
-        if isinstance(elements, _HtmlProvider):
-            elements = elements.__html__()
-        data_lines = []
-        if mode and mode != consts.ElementPatchMode.OUTER:
-            data_lines.append(f"{consts.MODE_DATALINE_LITERAL} {mode}")
-        if selector:
-            data_lines.append(f"{consts.SELECTOR_DATALINE_LITERAL} {selector}")
-        if (
-            use_view_transition is not None
-            and use_view_transition != consts.DEFAULT_ELEMENTS_USE_VIEW_TRANSITIONS
-        ):
-            data_lines.append(
-                f"{consts.USE_VIEW_TRANSITION_DATALINE_LITERAL} {_js_bool(use_view_transition)}"
+        return cls._send(
+            **cls._patch_elements(
+                elements=elements,
+                selector=selector,
+                mode=mode,
+                use_view_transition=use_view_transition,
+                namespace=namespace,
+                event_id=event_id,
+                retry_duration=retry_duration,
             )
-        if namespace and namespace != consts.ElementPatchNamespace.HTML:
-            data_lines.append(f"{consts.NAMESPACE_DATALINE_LITERAL} {namespace}")
-
-        if elements:
-            data_lines.extend(
-                f"{consts.ELEMENTS_DATALINE_LITERAL} {x}" for x in elements.splitlines()
-            )
-
-        return ServerSentEventGenerator._send(
-            consts.EventType.PATCH_ELEMENTS,
-            data_lines,
-            event_id,
-            retry_duration,
         )
 
     @classmethod
     def remove_elements(
         cls, selector: str, event_id: str | None = None, retry_duration: int | None = None
     ) -> DatastarEvent:
-        return ServerSentEventGenerator.patch_elements(
-            selector=selector,
-            mode=consts.ElementPatchMode.REMOVE,
-            event_id=event_id,
-            retry_duration=retry_duration,
+        return cls._send(
+            **cls._patch_elements(
+                selector=selector,
+                mode=consts.ElementPatchMode.REMOVE,
+                event_id=event_id,
+                retry_duration=retry_duration,
+            )
         )
 
     @classmethod
@@ -141,24 +249,13 @@ class ServerSentEventGenerator:
         only_if_missing: bool | None = None,
         retry_duration: int | None = None,
     ) -> DatastarEvent:
-        data_lines = []
-        if (
-            only_if_missing is not None
-            and only_if_missing != consts.DEFAULT_PATCH_SIGNALS_ONLY_IF_MISSING
-        ):
-            data_lines.append(
-                f"{consts.ONLY_IF_MISSING_DATALINE_LITERAL} {_js_bool(only_if_missing)}"
+        return cls._send(
+            **cls._patch_signals(
+                signals=signals,
+                event_id=event_id,
+                only_if_missing=only_if_missing,
+                retry_duration=retry_duration,
             )
-
-        signals_str = (
-            signals if isinstance(signals, str) else json.dumps(signals, separators=(",", ":"))
-        )
-        data_lines.extend(
-            f"{consts.SIGNALS_DATALINE_LITERAL} {line}" for line in signals_str.splitlines()
-        )
-
-        return ServerSentEventGenerator._send(
-            consts.EventType.PATCH_SIGNALS, data_lines, event_id, retry_duration
         )
 
     @classmethod
@@ -170,30 +267,16 @@ class ServerSentEventGenerator:
         event_id: str | None = None,
         retry_duration: int | None = None,
     ) -> DatastarEvent:
-        attribute_string = ""
-        if auto_remove:
-            attribute_string += ' data-effect="el.remove()"'
-        if attributes:
-            if isinstance(attributes, Mapping):
-                attribute_string += " " + " ".join(
-                    f'{_escape(k)}="{_escape(v)}"' for k, v in attributes.items()
-                )
-            else:
-                attribute_string += " " + " ".join(attributes)
-        script_tag = f"<script{attribute_string}>{script}</script>"
-
-        return ServerSentEventGenerator.patch_elements(
-            script_tag,
-            mode=consts.ElementPatchMode.APPEND,
-            selector="body",
-            event_id=event_id,
-            retry_duration=retry_duration,
+        return cls._send(
+            **cls._execute_script(
+                script=script,
+                auto_remove=auto_remove,
+                attributes=attributes,
+                event_id=event_id,
+                retry_duration=retry_duration,
+            )
         )
 
     @classmethod
     def redirect(cls, location: str) -> DatastarEvent:
-        return cls.execute_script(f"setTimeout(() => window.location = '{location}')")
-
-
-def _js_bool(b: bool) -> str:
-    return "true" if b else "false"
+        return cls._send(**cls._redirect(location))
