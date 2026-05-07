@@ -157,6 +157,9 @@ async def my_route(request):
         await asyncio.sleep(1)
 ```
 
+> [!NOTE]
+> The `datastar_response` decorator is not needed, (and not provided by the fastapi module,) for FastAPI. Instead, `response_class=DatastarResponse` should be specified in the route decorator to achieve the same result.   
+
 ## Signal Helpers
 The current state of the datastar signals is included by default in every
 datastar request. A helper is included to load those signals for each
