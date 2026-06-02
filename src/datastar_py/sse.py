@@ -68,6 +68,7 @@ class ServerSentEventGenerator:
         selector: str,
         mode: Literal[consts.ElementPatchMode.REMOVE],
         use_view_transition: bool | None = None,
+        view_transition_selector: str | None = None,
         namespace: consts.ElementPatchNamespace | None = None,
         event_id: str | None = None,
         retry_duration: int | None = None,
@@ -80,6 +81,7 @@ class ServerSentEventGenerator:
         selector: str | None = None,
         mode: consts.ElementPatchMode | None = None,
         use_view_transition: bool | None = None,
+        view_transition_selector: str | None = None,
         namespace: consts.ElementPatchNamespace | None = None,
         event_id: str | None = None,
         retry_duration: int | None = None,
@@ -91,6 +93,7 @@ class ServerSentEventGenerator:
         selector: str | None = None,
         mode: consts.ElementPatchMode | None = None,
         use_view_transition: bool | None = None,
+        view_transition_selector: str | None = None,
         namespace: consts.ElementPatchNamespace | None = None,
         event_id: str | None = None,
         retry_duration: int | None = None,
@@ -108,6 +111,10 @@ class ServerSentEventGenerator:
         ):
             data_lines.append(
                 f"{consts.USE_VIEW_TRANSITION_DATALINE_LITERAL} {_js_bool(use_view_transition)}"
+            )
+        if view_transition_selector:
+            data_lines.append(
+                f"{consts.VIEW_TRANSITION_SELECTOR_DATALINE_LITERAL} {view_transition_selector}"
             )
         if namespace and namespace != consts.ElementPatchNamespace.HTML:
             data_lines.append(f"{consts.NAMESPACE_DATALINE_LITERAL} {namespace}")
