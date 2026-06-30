@@ -96,5 +96,5 @@ def datastar_response(
     return wrapper
 
 
-async def read_signals(request: Request) -> dict[str, Any] | None:
+async def read_signals(request: Request[Any, Any]) -> dict[str, Any] | None:
     return _read_signals(request.method, request.headers, request.args, request.body)
