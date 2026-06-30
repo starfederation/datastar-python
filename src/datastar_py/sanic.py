@@ -40,14 +40,14 @@ class DatastarResponse(HTTPResponse):
 
     async def send(
         self,
-        event: DatastarEvent | None = None,
+        data: DatastarEvent | None = None,
         end_stream: bool | None = None,
     ) -> None:
-        if event and self.status == 204:
+        if data and self.status == 204:
             # When the response is created with no content, it's set to a 204 by default
             # if we end up streaming to it, change the status code to 200 before sending.
             self.status = 200
-        await super().send(event, end_stream=end_stream)
+        await super().send(data, end_stream=end_stream)
 
 
 async def datastar_respond(
