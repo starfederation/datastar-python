@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Coroutine, Mapping
+from collections.abc import AsyncIterable, Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
 from inspect import isasyncgenfunction, isawaitable, iscoroutinefunction
 from typing import Any, ParamSpec, overload
@@ -47,6 +47,12 @@ P = ParamSpec("P")
 @overload
 def datastar_response(
     func: Callable[P, Coroutine[Any, Any, DatastarEvents]],
+) -> Callable[P, Coroutine[Any, Any, DatastarResponse]]: ...
+
+
+@overload
+def datastar_response(
+    func: Callable[P, AsyncIterable[DatastarEvent]],
 ) -> Callable[P, Coroutine[Any, Any, DatastarResponse]]: ...
 
 
