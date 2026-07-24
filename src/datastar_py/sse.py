@@ -32,9 +32,9 @@ class DatastarEvent(str):
 
 
 # 0..N datastar events
-DatastarEvents: TypeAlias = (
-    DatastarEvent | Iterable[DatastarEvent] | AsyncIterable[DatastarEvent] | None
-)
+SyncDatastarEvents: TypeAlias = DatastarEvent | Iterable[DatastarEvent] | None
+AsyncDatastarEvents: TypeAlias = AsyncIterable[DatastarEvent]
+DatastarEvents: TypeAlias = SyncDatastarEvents | AsyncDatastarEvents
 
 
 class ServerSentEventGenerator:

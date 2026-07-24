@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterable, Awaitable, Callable, Coroutine, Mapping
+from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
 from inspect import isasyncgenfunction, isawaitable, iscoroutinefunction
 from typing import Any, ParamSpec, overload
@@ -9,7 +9,14 @@ from django.http import HttpRequest
 from django.http import StreamingHttpResponse as _StreamingHttpResponse
 
 from . import _read_signals
-from .sse import SSE_HEADERS, DatastarEvent, DatastarEvents, ServerSentEventGenerator
+from .sse import (
+    SSE_HEADERS,
+    AsyncDatastarEvents,
+    DatastarEvent,
+    DatastarEvents,
+    ServerSentEventGenerator,
+    SyncDatastarEvents,
+)
 
 __all__ = [
     "SSE_HEADERS",
@@ -46,19 +53,19 @@ P = ParamSpec("P")
 
 @overload
 def datastar_response(
-    func: Callable[P, Coroutine[Any, Any, DatastarEvents]],
+    func: Callable[P, Coroutine[Any, Any, SyncDatastarEvents]],
 ) -> Callable[P, Coroutine[Any, Any, DatastarResponse]]: ...
 
 
 @overload
 def datastar_response(
-    func: Callable[P, AsyncIterable[DatastarEvent]],
+    func: Callable[P, AsyncDatastarEvents],
 ) -> Callable[P, Coroutine[Any, Any, DatastarResponse]]: ...
 
 
 @overload
 def datastar_response(
-    func: Callable[P, DatastarEvents],
+    func: Callable[P, SyncDatastarEvents],
 ) -> Callable[P, DatastarResponse]: ...
 
 
