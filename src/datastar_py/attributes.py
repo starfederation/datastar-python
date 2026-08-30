@@ -408,7 +408,7 @@ class ViewtransitionMod:
     @property
     def viewtransition(self: Self) -> Self:
         """Wrap the expression in document.startViewTransition()."""
-        self._mods["view-transition"] = []
+        self._mods["viewtransition"] = []
         return self
 
 
