@@ -253,7 +253,7 @@ class AttributeGenerator:
     def preserve_attr(self, attrs: str | Iterable[str]) -> BaseAttr:
         """Preserve the client side state for specified attribute(s) when morphing."""
         value = attrs if isinstance(attrs, str) else " ".join(attrs)
-        return BaseAttr("preserve-attrs", value=value, alias=self._alias)
+        return BaseAttr("preserve-attr", value=value, alias=self._alias)
 
     @property
     def query_string(self) -> QueryStringAttr:
