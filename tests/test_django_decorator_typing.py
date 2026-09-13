@@ -35,7 +35,10 @@ def test_django_datastar_response_mypy_overloads() -> None:
         'Revealed type is "def (request: django.http.request.HttpRequest) '
         '-> datastar_py.django.DatastarResponse"'
     ) in output
-    assert output.count(
-        'Revealed type is "def (request: django.http.request.HttpRequest) '
-        '-> typing.Coroutine[Any, Any, datastar_py.django.DatastarResponse]"'
-    ) == 2
+    assert (
+        output.count(
+            'Revealed type is "def (request: django.http.request.HttpRequest) '
+            '-> typing.Coroutine[Any, Any, datastar_py.django.DatastarResponse]"'
+        )
+        == 2
+    )
