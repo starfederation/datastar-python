@@ -1,7 +1,7 @@
 .PHONY: test lint
 
 test:
-	uv run --dev pytest
+	@trap 'rm -f uv.lock' EXIT; uv run --with pytest pytest
 
 lint:
 	uv run --dev pre-commit run --all-files
