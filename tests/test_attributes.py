@@ -23,10 +23,12 @@ from datastar_py.attributes import attribute_generator as ds
             {"data-style": '{"width": (first, second)}'},
         ),
         (
+            # kwargs form
             ds.signals(
                 items1=["first", "second"],
                 items2=["first, second"],
                 items3="first, second",
+                # expressions_ = False, # <- this is the default
             ),
             {
                 "data-signals": (
@@ -35,6 +37,7 @@ from datastar_py.attributes import attribute_generator as ds
             },
         ),
         (
+            # kwargs form
             ds.signals(
                 items1=["first", "second"],
                 items2=["first, second"],
@@ -48,51 +51,7 @@ from datastar_py.attributes import attribute_generator as ds
             },
         ),
         (
-            ds.signals(
-                {
-                    "items1": ["first", "second"],
-                    "items2": ["first, second"],
-                    "items3": "first, second",
-                },
-            ),
-            {
-                "data-signals": (
-                    '{"items1": ["first", "second"], "items2": ["first, second"], "items3": "first, second"}'
-                )
-            },
-        ),
-        (
-            ds.signals(
-                {
-                    "items1": ["first", "second"],
-                    "items2": ["first, second"],
-                    "items3": "first, second",
-                    "expressions_": False,
-                },
-                expressions_=True,
-            ),
-            {
-                "data-signals": (
-                    '{"items1": [(first), (second)], "items2": [(first, second)], "items3": (first, second), "expressions_": false}'
-                )
-            },
-        ),
-        (
-            ds.signals(
-                {
-                    "items1": ["first", "second"],
-                    "items2": ["first, second"],
-                    "items3": "first, second",
-                },
-                expressions_=True,
-            ),
-            {
-                "data-signals": (
-                    '{"items1": [(first), (second)], "items2": [(first, second)], "items3": (first, second)}'
-                )
-            },
-        ),
-        (
+            # dict form with tuples
             ds.signals(
                 {
                     "items1": ("first", "second"),
@@ -107,6 +66,22 @@ from datastar_py.attributes import attribute_generator as ds
             },
         ),
         (
+            # dict form with lists
+            ds.signals(
+                {
+                    "items1": ["first", "second"],
+                    "items2": ["first, second"],
+                    "items3": "first, second",
+                },
+            ),
+            {
+                "data-signals": (
+                    '{"items1": ["first", "second"], "items2": ["first, second"], "items3": "first, second"}'
+                )
+            },
+        ),
+        (
+            # dict form with tuples and as expressions
             ds.signals(
                 {
                     "items1": ("first", "second"),
@@ -122,6 +97,23 @@ from datastar_py.attributes import attribute_generator as ds
             },
         ),
         (
+            # dict form with lists and as expressions
+            ds.signals(
+                {
+                    "items1": ["first", "second"],
+                    "items2": ["first, second"],
+                    "items3": "first, second",
+                },
+                expressions_=True,
+            ),
+            {
+                "data-signals": (
+                    '{"items1": [(first), (second)], "items2": [(first, second)], "items3": (first, second)}'
+                )
+            },
+        ),
+        (
+            # escape double quotes appropriately
             ds.signals(
                 {
                     "answer1": '{"value": 42}',
