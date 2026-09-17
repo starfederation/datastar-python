@@ -3,26 +3,27 @@ import math
 
 import pytest
 
-from datastar_py import attributes
+from datastar_py.attributes import JSExpression, javascript
+from datastar_py.attributes import attribute_generator as ds
 
 
 @pytest.mark.parametrize(
     ("attribute", "expected"),
     (
         (
-            attributes.attribute_generator.attr(title="first, second"),
+            ds.attr(title="first, second"),
             {"data-attr": '{"title": (first, second)}'},
         ),
         (
-            attributes.attribute_generator.class_({"active": "first, second"}),
+            ds.class_({"active": "first, second"}),
             {"data-class": '{"active": (first, second)}'},
         ),
         (
-            attributes.attribute_generator.style(width="first, second"),
+            ds.style(width="first, second"),
             {"data-style": '{"width": (first, second)}'},
         ),
         (
-            attributes.attribute_generator.signals(
+            ds.signals(
                 items1=["first", "second"],
                 items2=["first, second"],
                 items3="first, second",
@@ -34,7 +35,7 @@ from datastar_py import attributes
             },
         ),
         (
-            attributes.attribute_generator.signals(
+            ds.signals(
                 items1=["first", "second"],
                 items2=["first, second"],
                 items3="first, second",
@@ -47,7 +48,7 @@ from datastar_py import attributes
             },
         ),
         (
-            attributes.attribute_generator.signals(
+            ds.signals(
                 {
                     "items1": ["first", "second"],
                     "items2": ["first, second"],
@@ -61,7 +62,7 @@ from datastar_py import attributes
             },
         ),
         (
-            attributes.attribute_generator.signals(
+            ds.signals(
                 {
                     "items1": ["first", "second"],
                     "items2": ["first, second"],
@@ -77,7 +78,7 @@ from datastar_py import attributes
             },
         ),
         (
-            attributes.attribute_generator.signals(
+            ds.signals(
                 {
                     "items1": ["first", "second"],
                     "items2": ["first, second"],
@@ -92,7 +93,7 @@ from datastar_py import attributes
             },
         ),
         (
-            attributes.attribute_generator.signals(
+            ds.signals(
                 {
                     "items1": ("first", "second"),
                     "items2": ("first, second",),
@@ -106,7 +107,7 @@ from datastar_py import attributes
             },
         ),
         (
-            attributes.attribute_generator.signals(
+            ds.signals(
                 {
                     "items1": ("first", "second"),
                     "items2": ("first, second",),
@@ -121,7 +122,7 @@ from datastar_py import attributes
             },
         ),
         (
-            attributes.attribute_generator.signals(
+            ds.signals(
                 {
                     "answer1": '{"value": 42}',
                     "answer2": {"value": 42},
@@ -131,7 +132,7 @@ from datastar_py import attributes
             {"data-signals": ('{"answer1": ({"value": 42}), "answer2": {"value": 42}}')},
         ),
         (
-            attributes.attribute_generator.signals(
+            ds.signals(
                 {
                     "answer1": '{"value": 42}',
                     "answer2": {"value": 42},
@@ -149,25 +150,23 @@ def test_expression_apis_parenthesize_ambiguous_values(attribute, expected):
     ("attribute", "expected"),
     (
         (
-            attributes.attribute_generator.attr(title='"hello"', hidden="$closed"),
+            ds.attr(title='"hello"', hidden="$closed"),
             {"data-attr": '{"title": ("hello"), "hidden": ($closed)}'},
         ),
         (
-            attributes.attribute_generator.class_({"active item": "$selected", "plain": "true"}),
+            ds.class_({"active item": "$selected", "plain": "true"}),
             {"data-class": '{"active item": ($selected), "plain": (true)}'},
         ),
         (
-            attributes.attribute_generator.style(width="$width + 'px'"),
+            ds.style(width="$width + 'px'"),
             {"data-style": "{\"width\": ($width + 'px')}"},
         ),
         (
-            attributes.attribute_generator.signals({"form": {"count": "1 + 1"}}),
+            ds.signals({"form": {"count": "1 + 1"}}),
             {"data-signals": '{"form": {"count": "1 + 1"}}'},
         ),
         (
-            attributes.attribute_generator.signals(
-                {"form": {"count": "1 + 1"}}, expressions_=True
-            ),
+            ds.signals({"form": {"count": "1 + 1"}}, expressions_=True),
             {"data-signals": '{"form": {"count": (1 + 1)}}'},
         ),
     ),
@@ -178,7 +177,7 @@ def test_expression_apis_wrap_values_explicitly(attribute, expected):
 
 def test_expression_signals_recurse_through_nested_lists():
     assert dict(
-        attributes.attribute_generator.signals(
+        ds.signals(
             {
                 "form": {
                     "total": "2 * 3",
@@ -204,7 +203,7 @@ def test_literal_signals_remain_data_and_escape_action_tokens():
         "quoted_example": 'a "quoted" value',
     }
 
-    rendered = dict(attributes.attribute_generator.signals(signals))["data-signals"]
+    rendered = dict(ds.signals(signals))["data-signals"]
     assert isinstance(rendered, str)
 
     assert rendered == "".join(
@@ -227,21 +226,21 @@ def test_mapping_values_serialize_recursively():
             # This test can catch accidental fallbacks to str()
             # instead of JSON serialization.
             "items": [True, False, None, 3],
-            "expression": attributes.JSExpression("1 + 1"),
+            "expression": JSExpression("1 + 1"),
         },
     }
 
-    assert attributes.javascript(value) == (
+    assert javascript(value) == (
         '{"literal": "text", "nested": {"items": [true, false, null, 3], "expression": (1 + 1)}}'
     )
 
 
 def test_mapping_keys_are_strings_and_escaped_as_data():
     with pytest.raises(TypeError, match="object keys must be strings"):
-        attributes.javascript({1: "value"})
+        javascript({1: "value"})
 
     assert (
-        attributes.javascript(
+        javascript(
             {
                 'quote"\\snow雪': "value",
                 '@post("key")': "action-looking key",
@@ -255,4 +254,4 @@ def test_mapping_keys_are_strings_and_escaped_as_data():
 @pytest.mark.parametrize("value", (math.nan, math.inf, -math.inf))
 def test_non_finite_signal_values_are_rejected_in_both_modes(expressions, value):
     with pytest.raises(ValueError):
-        attributes.attribute_generator.signals({"value": value}, expressions_=expressions)
+        ds.signals({"value": value}, expressions_=expressions)
