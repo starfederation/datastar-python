@@ -23,7 +23,7 @@ from datastar_py.attributes import attribute_generator as ds
             {"data-style": '{"width": (first, second)}'},
         ),
         (
-            # kwargs form
+            # kwargs form with default expressions_ = False
             ds.signals(
                 items1=["first", "second"],
                 items2=["first, second"],
@@ -37,7 +37,7 @@ from datastar_py.attributes import attribute_generator as ds
             },
         ),
         (
-            # kwargs form
+            # kwargs form with expressions
             ds.signals(
                 items1=["first", "second"],
                 items2=["first, second"],
