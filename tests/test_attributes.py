@@ -138,6 +138,13 @@ def test_expression_apis_parenthesize_ambiguous_values(attribute, expected):
     assert dict(attribute) == expected
 
 
+def test_signals_support_mixed_literals_and_expressions():
+    assert ds.signals(
+        literal="window.innerWidth",
+        expression=JSExpression("window.innerWidth"),
+    ) == {"data-signals": ('{"literal": "window.innerWidth", "expression": (window.innerWidth)}')}
+
+
 @pytest.mark.parametrize(
     ("attribute", "expected"),
     (

@@ -102,18 +102,6 @@ JSEvent = Literal[
 ]
 
 
-SignalValue: TypeAlias = (
-    str
-    | int
-    | float
-    | bool
-    | dict[str, "SignalValue"]
-    | list["SignalValue"]
-    | tuple["SignalValue", ...]
-    | None
-)
-
-
 @dataclasses.dataclass(frozen=True)
 class JSExpression:
     """JavaScript expression."""
@@ -123,6 +111,19 @@ class JSExpression:
     def __post_init__(self) -> None:
         """Reject empty or non-string expression source."""
         _require_nonblank_string("JSExpression.value", self.value)
+
+
+SignalValue: TypeAlias = (
+    str
+    | int
+    | float
+    | bool
+    | JSExpression
+    | dict[str, "SignalValue"]
+    | list["SignalValue"]
+    | tuple["SignalValue", ...]
+    | None
+)
 
 
 def _require_nonblank_string(name: str, value: object) -> None:
