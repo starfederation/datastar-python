@@ -31,6 +31,7 @@ available in this package.
 import asyncio
 from datetime import datetime
 
+import datastar_py
 from datastar_py import ServerSentEventGenerator as SSE, attribute_generator as data
 from datastar_py.quart import datastar_response, read_signals
 from quart import Quart
@@ -43,7 +44,7 @@ def index():
     return f"""
         <html>
             <head>
-                <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-RC.7/bundles/datastar.js"></script>
+                <script type="module" src="{datastar_py.url('v1.0.0-RC.7')}"></script>
             </head>
             <body {data.init("@get('/updates')")}>
                 <span id="currentTime"></span><br>
