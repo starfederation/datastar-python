@@ -3,14 +3,13 @@ from typing import Annotated, Any
 from fastapi import Depends
 
 from .sse import SSE_HEADERS, ServerSentEventGenerator
-from .starlette import DatastarResponse, datastar_response, read_signals
+from .starlette import DatastarResponse, read_signals
 
 __all__ = [
     "SSE_HEADERS",
     "DatastarResponse",
     "ReadSignals",
     "ServerSentEventGenerator",
-    "datastar_response",
     "read_signals",
 ]
 
