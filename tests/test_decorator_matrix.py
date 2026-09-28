@@ -18,6 +18,7 @@ FRAMEWORKS = [
     ("fastapi", "datastar_py.fastapi", "body_iterator"),
     ("litestar", "datastar_py.litestar", "iterator"),
     ("django", "datastar_py.django", None),
+    ("bottle", "datastar_py.bottle", None),
     # Quart and Sanic need full request contexts; covered elsewhere
     ("quart", "datastar_py.quart", None),
     ("sanic", "datastar_py.sanic", None),
@@ -65,6 +66,10 @@ async def test_datastar_response_matrix(
     """Ensure decorator works for sync/async and generator/non-generator functions."""
     if framework_name in {"quart", "sanic"}:
         pytest.skip(f"{framework_name} decorator requires full request context to exercise")
+
+    if framework_name == "bottle" and variant in {"async_value", "async_generator"}:
+        pytest.skip("Bottle is synchronous and does not support async route callbacks")
+
     if framework_name == "django":
         from django.conf import settings
 
